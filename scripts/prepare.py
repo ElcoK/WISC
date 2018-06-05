@@ -106,16 +106,38 @@ def get_storm_list():
 
     return storm_list
 
-def load_max_dam():
+def load_max_dam(data_path):
+    """
+    
+    """   
+    return pd.read_excel(os.path.join(data_path,'input_data','max_dam2.xlsx'))
+
+
+def load_curves(data_path):
+    """
+    """
+    return pd.read_csv(os.path.join(data_path,'input_data','CURVES.csv'),index_col=[0],names=['C1','C2','C3','C4','C5','C6'])
+
+
+def load_sample(country):
     """
     
     """
-     # get data path
-    data_path = load_config()['paths']['data']
-   
-    return pd.read_excel(os.path.join(data_path,'input_data','max_dam.xlsx'))
+    
+    dict_  = dict([('AT', ( 5, 0,95,20)), 
+                         ('BE', ( 0,45,55,50)), 
+                         ('DK', ( 0,20,80,20)),
+                         ('FR', (10,50,40,20)), 
+                         ('DE', ( 5,75,20,50)),
+                         ('IE', (35,65, 0,30)), 
+                         ('LU', (50,50, 0,20)),
+                         ('NL', ( 0,45,55,20)), 
+                         ('NO', (0,100, 0,20)),
+                         ('SE', ( 0,10,90,50)),
+                         ('UK', ( 5,30,65,50))])
 
-
+    return dict_[country]
+    
 def poly_files(data_path,country):
 
     """

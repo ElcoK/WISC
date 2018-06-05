@@ -9,7 +9,7 @@ import os
 from utils import load_config,create_folder_structure
 
 from prepare import poly_files,buildings
-from analyze import exposure
+from analyze import exposure,losses
 
 if __name__ == "__main__":
 
@@ -21,7 +21,8 @@ if __name__ == "__main__":
     
     create_folder_structure(data_path,country)
     
-    exp_data = exposure(data_path,country,parallel=False)
-    
+    exp_data = losses(data_path,country)
+#    
+    exp_data = exp_data.drop('centroid',axis='columns')
     exp_data.to_file(os.path.join(data_path,country,'test.shp'))
     
