@@ -9,34 +9,71 @@ import os
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from scripts.utils import load_config
+from multiprocessing import Pool,cpu_count
 
-def extract_buildings(area):
+from utils import load_config
+
+def buildings(country, parallel = True):
+    """
+    """
+    # get data path
+    data_path = load_config()['paths']['data']
+
+    # create country poly files
+    poly_files(data_path,country)
+    
+    #get list of regions for which we have poly files (should be all) 
+    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
+    regions = [x.split('.')[0] for x in regions]
+    
+    # set path of osm countr file:
+    osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
+    
+    if parallel == True:
+        None
+    else:
+        for region in regions:
+            region_poly = os.path.join(data_path,country,'NUTS2_POLY','{}.poly'.format(region))
+            region_pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
+            
+            # clip osm to nuts2 region
+            clip_osm(data_path,osm_path,region_poly,region_pbf)
+    
+            # extract buildings for the region
+            extract_buildings(region,country)            
+            
+            # convert buildings to epsg:3035, making it compatible with landuse maps
+            convert_buildings(region,country)
+
+def extract_buildings(area,country,nuts2=True):
     """
 
     """
     # get data path
     data_path = load_config()['paths']['data']
 
-    wgs = os.path.join(data_path,area,'BUILDINGS','{}_buildings_wgs.shp'.format(area))
-    pbf = os.path.join(data_path,'OSM','{}.osm.pbf'.format(area))
-
+    wgs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings_wgs.shp'.format(area))
+    if nuts2 == True:
+        pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(area))
+    else:
+        pbf = os.path.join(data_path,'OSM','{}.osm.pbf'.format(area))
+  
     os.system('ogr2ogr -progress -f "ESRI shapefile" {} {} -sql "select \
               building,amenity from multipolygons where building is not null" \
               -lco ENCODING=UTF-8 -nlt POLYGON -skipfailures'.format(wgs,pbf))
 
-def convert_buildings(area):
+def convert_buildings(area,country):
     """
 
     """    
     # get data path
     data_path = load_config()['paths']['data']
 
-    etrs = os.path.join(data_path,area,'BUILDINGS','{}_buildings.shp'.format(area))
-    wgs_nuts = os.path.join(data_path,area,'BUILDINGS','{}_buildings_wgs.shp'.format(area))
+    etrs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings.shp'.format(area))
+    wgs_nuts = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings_wgs.shp'.format(area))
     
-    os.system('ogr2ogr -f "ESRI Shapefile" {} {} -s \
-              srs \EPSG:4326 -t_srs EPSG:3035'.format(etrs,wgs_nuts))
+    os.system('ogr2ogr -f "ESRI Shapefile" {} {} -s_srs \
+              EPSG:4326 -t_srs EPSG:3035'.format(etrs,wgs_nuts))
     
 def get_storm_list():
     """
@@ -88,7 +125,7 @@ def poly_files(data_path,country):
 # =============================================================================
 #     """ Create output dir for .poly files if it is doesnt exist yet"""
 # =============================================================================
-    poly_dir = os.path.join(data_path,country,'poly_files')
+    poly_dir = os.path.join(data_path,country,'NUTS2_POLY')
         
     if not os.path.exists(poly_dir):
         os.makedirs(poly_dir)
@@ -101,7 +138,9 @@ def poly_files(data_path,country):
     # filter polygon file
     country_poly = wb_poly.loc[(wb_poly['NUTS_ID'].apply(lambda x: x.startswith(country))) & (wb_poly['STAT_LEVL_']==2)]
 
-    country_poly.crs = {'init' :'epsg:4326'}
+    country_poly.crs = {'init' :'epsg:3035'}
+
+    country_poly = country_poly.to_crs({'init': 'epsg:4326'})
     
 # =============================================================================
 #   """ The important part of this function: create .poly files to clip the country 

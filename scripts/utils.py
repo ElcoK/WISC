@@ -56,14 +56,21 @@ def create_folder_structure(data_path,country):
     
     data_path = load_config()['paths']['data']
     
-    if not os.path.exists(os.path.join(data_path,'{}'.format(country))):
-        os.makedirs(os.path.join(data_path,'{}'.format(country)))
-    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_SHAPE')):
-        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_SHAPE')
-    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_OUTPUT')):
-        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_OUTPUT')
-    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_LANDUSE')):        
-        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_LANDUSE')        
+    if not os.path.exists(os.path.join(data_path,country)):
+        os.makedirs(os.path.join(data_path,country))
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_SHAPE')):
+        os.makedirs(os.path.join(data_path,country,'NUTS2_SHAPE'))
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_OUTPUT')):
+        os.makedirs(os.path.join(data_path,country,'NUTS2_OUTPUT'))
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_LANDUSE')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS2_LANDUSE'))        
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_OSM')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS2_OSM')) 
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_POLY')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS2_POLY')) 
+    if not os.path.exists(os.path.join(data_path,country,'NUTS2_BUILDINGS')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS2_BUILDINGS')) 
+
 
 def int2date(argdate: int):
     """
