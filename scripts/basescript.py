@@ -8,7 +8,8 @@ Created on Tue Jun  5 10:41:21 2018
 import os
 from utils import load_config,create_folder_structure
 
-from prepare import get_storm_list,poly_files,buildings
+from prepare import poly_files,buildings
+from analyze import exposure
 
 if __name__ == "__main__":
 
@@ -20,6 +21,7 @@ if __name__ == "__main__":
     
     create_folder_structure(data_path,country)
     
-    buildings(country,parallel=False)
-    storms = get_storm_list()
+    exp_data = exposure(data_path,country,parallel=False)
+    
+    exp_data.to_file(os.path.join(data_path,country,'test.shp'))
     

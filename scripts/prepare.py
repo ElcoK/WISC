@@ -9,6 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import subprocess
 from multiprocessing import Pool,cpu_count
 
 from utils import load_config
@@ -32,6 +33,7 @@ def buildings(country, parallel = True):
     if parallel == True:
         None
     else:
+        country_table = []
         for region in regions:
             region_poly = os.path.join(data_path,country,'NUTS2_POLY','{}.poly'.format(region))
             region_pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
@@ -43,7 +45,14 @@ def buildings(country, parallel = True):
             extract_buildings(region,country)            
             
             # convert buildings to epsg:3035, making it compatible with landuse maps
-            convert_buildings(region,country)
+            nuts2_buildings = convert_buildings(region,country)
+            nuts2_buildings['NUTS2_ID'] = region
+            country_table.append(nuts2_buildings)
+    
+    country_table = gpd.GeoDataFrame(pd.concat(country_table))
+    
+    return country_table
+
 
 def extract_buildings(area,country,nuts2=True):
     """
@@ -74,6 +83,8 @@ def convert_buildings(area,country):
     
     os.system('ogr2ogr -f "ESRI Shapefile" {} {} -s_srs \
               EPSG:4326 -t_srs EPSG:3035'.format(etrs,wgs_nuts))
+    
+    return gpd.read_file(etrs)
     
 def get_storm_list():
     """
@@ -190,6 +201,18 @@ def poly_files(data_path,country):
         # close the file when done
         f.write("END" +"\n")
         f.close()
+
+def clip_landuse(data_path,country,outrast_lu):
+    """
+    """
+    
+    inraster = os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')
+    
+    inshape = os.path.join(data_path,country,'NUTS2_SHAPE','{}.shp'.format(country))
+   
+    subprocess.call(["gdalwarp","-q","-overwrite","-srcnodata","-9999","-co","compress=lzw","-tr","100","-100","-r","near",inraster, outrast_lu, "-cutline", inshape,"-crop_to_cutline"])
+ 
+    
 
 def clip_osm(data_path,osm_path,area_poly,area_pbf):
     """ Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. 
