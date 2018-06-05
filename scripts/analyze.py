@@ -9,7 +9,7 @@ def exposure(country):
     """
     """
     
-def losses(country):
+def losses(country,regionalized = True):
     """
     """
     

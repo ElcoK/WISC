@@ -8,6 +8,7 @@ Created on Mon Jun  4 20:47:48 2018
 import os
 import json
 import shutil
+from datetime import date
 
 def load_config():
     """Read config.json
@@ -43,7 +44,6 @@ def remove_files(dirpath,startname):
         if fname.startswith(startname):
             os.remove(os.path.join(dirpath, fname))
 
-
 def create_folder_structure(data_path,country):
     """Create the directory structure for the output
     
@@ -55,3 +55,36 @@ def create_folder_structure(data_path,country):
     """
     
     data_path = load_config()['paths']['data']
+    
+    if not os.path.exists(os.path.join(data_path,'{}'.format(country))):
+        os.makedirs(os.path.join(data_path,'{}'.format(country)))
+    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_SHAPE')):
+        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_SHAPE')
+    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_OUTPUT')):
+        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_OUTPUT')
+    if not os.path.exists(os.path.join(data_path,'{}'.format(country),'NUTS2_LANDUSE')):        
+        os.makedirs(os.path.join(data_path,'{}'.format(country)),'NUTS2_LANDUSE')        
+
+def int2date(argdate: int):
+    """
+    If you have date as an integer, use this method to obtain a datetime.date object.
+
+    Parameters
+    ----------
+    argdate : int
+      Date as a regular integer value (example: 20160618)
+
+    Returns
+    -------
+    dateandtime.date
+      A date object which corresponds to the given value `argdate`.
+    """
+    year = int(argdate / 10000)
+    month = int((argdate % 10000) / 100)
+    day = int(argdate % 100)
+
+    return date(year, month, day)
+
+
+def get_num(x):
+    return int(''.join(ele for ele in x if ele.isdigit()))
