@@ -18,10 +18,10 @@ def buildings(country, parallel = True):
     """[summary]
     
     Arguments:
-        country {[type]} -- [description]
+       country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
-        parallel {bool} -- [description] (default: {True})
+       parallel {bool} -- [description] (default: {True})
     
     Returns:
         [type] -- [description]
@@ -69,7 +69,7 @@ def extract_buildings(area,country,nuts2=True):
     
     Arguments:
         area {[type]} -- [description]
-        country {[type]} -- [description]
+        country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
         nuts2 {bool} -- [description] (default: {True})
@@ -78,7 +78,7 @@ def extract_buildings(area,country,nuts2=True):
     # get data path
     data_path = load_config()['paths']['data']
 
-    wgs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings_wgs.shp'.format(area))
+    wgs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings.shp'.format(area))
     if nuts2 == True:
         pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(area))
     else:
@@ -89,31 +89,37 @@ def extract_buildings(area,country,nuts2=True):
               -lco ENCODING=UTF-8 -nlt POLYGON -skipfailures'.format(wgs,pbf))
 
 def convert_buildings(area,country):
-    """[summary]
+    """Converts the coordinate system from EPSG:4326 to EPSG:3035.
 
     Arguments:
-        area {[type]} -- [description]
-        country {[type]} -- [description]
+        area {string} -- name of area (most often NUTS2) for which buildings should be converted to European coordinate system 
+
+        country {string} -- ISO2 code of country to consider.
 
     Returns:
-        [type] -- [description]
+        geodataframe -- Geopandas dataframe with all buildings of the selected area
     """
     # get data path
     data_path = load_config()['paths']['data']
 
+    # path to area with buildings
     etrs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings.shp'.format(area))
-    wgs_nuts = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings_wgs.shp'.format(area))
-    
-    os.system('ogr2ogr -f "ESRI Shapefile" {} {} -s_srs \
-              EPSG:4326 -t_srs EPSG:3035'.format(etrs,wgs_nuts))
-    
-    return gpd.read_file(etrs)
+
+    # load data 
+    input_ = gpd.read_file(etrs)
+
+    input_ = input_.to_crs(epsg=3035)
+
+    return input_
     
 def get_storm_list(data_path):
-    """[summary]
+    """Small function to create a list of with path strings to all storms
     
     Arguments:
-        data_path {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+
+    Returns:
+        list -- list with the path strings of all storms
     """
    
     storm_list = []
@@ -129,30 +135,39 @@ def get_storm_list(data_path):
     return storm_list
 
 def load_max_dam(data_path):
-    """[summary]
+    """Small function to load the excel with maximum damages.
     
     Arguments:
-        data_path {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+
+    Returns:
+        dataframe -- pandas dataframe with maximum damages per landuse
     """
 
     return pd.read_excel(os.path.join(data_path,'input_data','max_dam2.xlsx'))
 
 
 def load_curves(data_path):
-    """[summary]
+    """Small function to load the csv file with the different fragility curves.
     
     Arguments:
-        data_path {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+
+    Returns:
+        dataframe -- pandas dataframe with fragility curves
     """
 
     return pd.read_csv(os.path.join(data_path,'input_data','CURVES.csv'),index_col=[0],names=['C1','C2','C3','C4','C5','C6'])
 
 
 def load_sample(country):
-    """[summary]
+    """Will load the ratio of each curve and landuse to be used.
     
     Arguments:
-        country {[type]} -- [description]
+        country {string} -- ISO2 code of country to consider.
+
+    Returns:
+        tuple -- tuple of ratios for the selected country
     """
 
     dict_  = dict([('AT', ( 5, 0,95,20)), 
@@ -256,12 +271,12 @@ def poly_files(data_path,country):
         f.close()
 
 def clip_landuse(data_path,country,outrast_lu):
-    """[summary]
+    """Clip the landuse from the European Corine Land Cover (CLC) map to the considered country
     
     Arguments:
-        data_path {[type]} -- [description]
-        country {[type]} -- [description]
-        outrast_lu {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+        country {string} -- ISO2 code of country to consider.
+        outrast_lu {string} -- string path to location of Corine Land Cover dataset 
     """
     
     inraster = os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')

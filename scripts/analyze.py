@@ -21,17 +21,17 @@ def exposure(data_path,country, parallel = True):
     Creation of exposure table of the specified country
     
     Arguments:
-        data_path {[type]} -- [description]
-        country {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+        country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
-        parallel {bool} -- [description] (default: {True})
+        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
     
     Returns:
-        [type] -- [description]
+        dataframe -- pandas dataframe with all buildings of the country and potential exposure to wind
     """
 
-    input_ = buildings(country,parallel=False)[:10000]
+    input_ = buildings(country,parallel=False)[:1000]
 
     #==============================================================================
     # Fill table
@@ -59,7 +59,7 @@ def exposure(data_path,country, parallel = True):
     #==============================================================================
     # Loop through storms
     #==============================================================================
-    storm_list = get_storm_list()
+    storm_list = get_storm_list(data_path)
     for outrast_storm in storm_list:
         storm_name = str(get_num(outrast_storm[-23:]))
         input_[storm_name] = point_query(list(input_['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')
@@ -69,19 +69,23 @@ def exposure(data_path,country, parallel = True):
     return input_
 
     
-def losses(data_path,country,regionalized = True):
-    """"""[summary]
+def losses(data_path,country,parallel = True):
+    """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
     
     Arguments:
-        data_path {[type]} -- [description]
-        country {[type]} -- [description]
+        data_path {string} -- string of data path where all data is located.
+        country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
-        regionalized {bool} -- [description] (default: {True})
+        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+    
+    Returns:
+        dataframe -- pandas dataframe with all buildings of the country and their losses for each wind storm
+
     """ 
 
     #load storms
-    storm_list = get_storm_list()
+    storm_list = get_storm_list(data_path)
     storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
 
     #load max dam
