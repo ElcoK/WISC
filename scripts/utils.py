@@ -94,4 +94,9 @@ def int2date(argdate: int):
 
 
 def get_num(x):
+    """[summary]
+    
+    Arguments:
+        x {[type]} -- [description]
+    """
     return int(''.join(ele for ele in x if ele.isdigit()))

@@ -15,8 +15,18 @@ from multiprocessing import Pool,cpu_count
 from utils import load_config
 
 def buildings(country, parallel = True):
+    """[summary]
+    
+    Arguments:
+        country {[type]} -- [description]
+    
+    Keyword Arguments:
+        parallel {bool} -- [description] (default: {True})
+    
+    Returns:
+        [type] -- [description]
     """
-    """
+    
     # get data path
     data_path = load_config()['paths']['data']
 
@@ -55,8 +65,15 @@ def buildings(country, parallel = True):
 
 
 def extract_buildings(area,country,nuts2=True):
-    """
-
+    """[summary]
+    
+    Arguments:
+        area {[type]} -- [description]
+        country {[type]} -- [description]
+    
+    Keyword Arguments:
+        nuts2 {bool} -- [description] (default: {True})
+    
     """
     # get data path
     data_path = load_config()['paths']['data']
@@ -72,9 +89,15 @@ def extract_buildings(area,country,nuts2=True):
               -lco ENCODING=UTF-8 -nlt POLYGON -skipfailures'.format(wgs,pbf))
 
 def convert_buildings(area,country):
-    """
+    """[summary]
 
-    """    
+    Arguments:
+        area {[type]} -- [description]
+        country {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     # get data path
     data_path = load_config()['paths']['data']
 
@@ -86,18 +109,17 @@ def convert_buildings(area,country):
     
     return gpd.read_file(etrs)
     
-def get_storm_list():
-    """
+def get_storm_list(data_path):
+    """[summary]
     
+    Arguments:
+        data_path {[type]} -- [description]
     """
-    # get data path
-    data_path = load_config()['paths']['data']
-
-    EXTENSION = ('.tif')
+   
     storm_list = []
     for root, dirs, files in os.walk(os.path.join(data_path,'STORMS')):
         for file in files:
-            if file.endswith(EXTENSION):
+            if file.endswith('.tif'):
                 fname = os.path.join(data_path,'STORMS',file)
                 (filepath, filename_storm) = os.path.split(fname) 
                 (fileshortname_storm, extension) = os.path.splitext(filename_storm) 
@@ -107,23 +129,32 @@ def get_storm_list():
     return storm_list
 
 def load_max_dam(data_path):
-    """
+    """[summary]
     
-    """   
+    Arguments:
+        data_path {[type]} -- [description]
+    """
+
     return pd.read_excel(os.path.join(data_path,'input_data','max_dam2.xlsx'))
 
 
 def load_curves(data_path):
+    """[summary]
+    
+    Arguments:
+        data_path {[type]} -- [description]
     """
-    """
+
     return pd.read_csv(os.path.join(data_path,'input_data','CURVES.csv'),index_col=[0],names=['C1','C2','C3','C4','C5','C6'])
 
 
 def load_sample(country):
-    """
+    """[summary]
     
+    Arguments:
+        country {[type]} -- [description]
     """
-    
+
     dict_  = dict([('AT', ( 5, 0,95,20)), 
                          ('BE', ( 0,45,55,50)), 
                          ('DK', ( 0,20,80,20)),
@@ -225,7 +256,12 @@ def poly_files(data_path,country):
         f.close()
 
 def clip_landuse(data_path,country,outrast_lu):
-    """
+    """[summary]
+    
+    Arguments:
+        data_path {[type]} -- [description]
+        country {[type]} -- [description]
+        outrast_lu {[type]} -- [description]
     """
     
     inraster = os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')

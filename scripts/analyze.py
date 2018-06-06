@@ -10,16 +10,25 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
 
-
 from prepare import buildings,get_storm_list,clip_landuse,load_max_dam,load_curves,load_sample
 from utils import get_num
-
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def exposure(data_path,country, parallel = True):
-    """
+    """"
+    Creation of exposure table of the specified country
+    
+    Arguments:
+        data_path {[type]} -- [description]
+        country {[type]} -- [description]
+    
+    Keyword Arguments:
+        parallel {bool} -- [description] (default: {True})
+    
+    Returns:
+        [type] -- [description]
     """
 
     input_ = buildings(country,parallel=False)[:10000]
@@ -61,8 +70,16 @@ def exposure(data_path,country, parallel = True):
 
     
 def losses(data_path,country,regionalized = True):
-    """
+    """"""[summary]
+    
+    Arguments:
+        data_path {[type]} -- [description]
+        country {[type]} -- [description]
+    
+    Keyword Arguments:
+        regionalized {bool} -- [description] (default: {True})
     """ 
+
     #load storms
     storm_list = get_storm_list()
     storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
