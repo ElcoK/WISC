@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import subprocess
-from multiprocessing import Pool,cpu_count
 
 from utils import load_config
 
