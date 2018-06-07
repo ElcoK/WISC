@@ -9,6 +9,7 @@ import numpy as np
 import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
+import time
 
 from prepare import buildings,get_storm_list,clip_landuse,load_max_dam,load_curves,load_sample
 from utils import get_num
@@ -31,22 +32,22 @@ def exposure(data_path,country, parallel = True):
         dataframe -- pandas dataframe with all buildings of the country and potential exposure to wind
     """
 
-    input_ = buildings(country,parallel=False)[:1000]
+    input_ = buildings(country,parallel=False)[:10000]
 
     #==============================================================================
     # Fill table
     #==============================================================================
 
-    #SPECIFY COUNTRY
+    # Specify Country
     input_["COUNTRY"] = country
     
-    #CALCULATE AREA
+    # Calculate area
     input_["AREA_m2"] = input_.geometry.area
 
-    #DETERMINE CENTROIDinput_
+    # Determine centroid
     input_["centroid"] = input_.geometry.centroid
 
-    # GET LAND USE
+    # Get land use
     nuts_eu = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
     nuts_eu.loc[nuts_eu['NUTS_ID']==country].to_file(os.path.join(data_path,
                                 country,'NUTS2_SHAPE','{}.shp'.format(country)))
@@ -55,7 +56,8 @@ def exposure(data_path,country, parallel = True):
     clip_landuse(data_path,country,CLC_2012)
 
     input_['CLC_2012'] = point_query(list(input_['centroid']),CLC_2012,nodata=-9999,interpolate='nearest')
-
+    
+    print('Finished coupling land-use to buildings for {}'.format(country))
     #==============================================================================
     # Loop through storms
     #==============================================================================
@@ -69,7 +71,7 @@ def exposure(data_path,country, parallel = True):
     return input_
 
     
-def losses(data_path,country,parallel = True):
+def losses(data_path,country,parallel = True,storm_event_set=False):
     """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
     
     Arguments:
@@ -83,10 +85,16 @@ def losses(data_path,country,parallel = True):
         dataframe -- pandas dataframe with all buildings of the country and their losses for each wind storm
 
     """ 
+    
+    start = time.time()
+
 
     #load storms
-    storm_list = get_storm_list(data_path)
-    storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
+    if storm_event_set == False:
+        storm_list = get_storm_list(data_path)
+        storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
+    else:
+        None
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -137,6 +145,11 @@ def losses(data_path,country,parallel = True):
         write_output[storm] = (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))
 
     print('Finished estimating the losses for {}'.format(country))
+
+    end = time.time()
+
+    print('{} took {} minutes to finish.'.format(country,str(np.float16((end - start)/60))))
+
 
     return(gpd.GeoDataFrame(write_output))
     """
