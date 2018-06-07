@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utils &mdash; WISC 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="WISC 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Prepare" href="prepare.html"/>
+        <link rel="prev" title="Getting started" href="readme.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> WISC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-config-file">Load config file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clean-directory">Clean directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remove-files-from-directory">Remove files from directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-folder-structure">Create folder structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integer-to-date">Integer to date</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-integer-from-string">Get integer from string</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prepare.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">WISC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utils">
+<h1>Utils<a class="headerlink" href="#utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="load-config-file">
+<h2>Load config file<a class="headerlink" href="#load-config-file" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">load_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#load_config"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Read config.json</p>
+</dd></dl>
+
+</div>
+<div class="section" id="clean-directory">
+<h2>Clean directory<a class="headerlink" href="#clean-directory" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">clean_dir</code><span class="sig-paren">(</span><em>dirpath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#clean_dir"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>“This function can be used to fully clear a directory</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>dirpath {string} – path to directory to be cleared from files</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="remove-files-from-directory">
+<h2>Remove files from directory<a class="headerlink" href="#remove-files-from-directory" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">remove_files</code><span class="sig-paren">(</span><em>dirpath</em>, <em>startname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#remove_files"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function can be used to delete specific files from a directory. In 
+general this function is used to clean country files from the ‘calc’ directory</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>dirpath {string} – path to directory in which the files should be removed
+startname {string} – the substring to be searched for in the files</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="create-folder-structure">
+<h2>Create folder structure<a class="headerlink" href="#create-folder-structure" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">create_folder_structure</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#create_folder_structure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create the directory structure for the output</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>base_path {string} – path to directory where folder structure should be created</dd>
+<dt>Keyword Arguments:</dt>
+<dd>regionalized {bool} – specify whether also the folders for a regionalized analyse should be created (default: {True})</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="integer-to-date">
+<h2>Integer to date<a class="headerlink" href="#integer-to-date" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">int2date</code><span class="sig-paren">(</span><em>argdate: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#int2date"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>If you have date as an integer, use this method to obtain a datetime.date object.</p>
+<dl class="docutils">
+<dt>argdate <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Date as a regular integer value (example: 20160618)</dd>
+</dl>
+<dl class="docutils">
+<dt>dateandtime.date</dt>
+<dd>A date object which corresponds to the given value <cite>argdate</cite>.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="get-integer-from-string">
+<h2>Get integer from string<a class="headerlink" href="#get-integer-from-string" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">get_num</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#get_num"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>[summary]</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>x {[type]} – [description]</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="prepare.html" class="btn btn-neutral float-right" title="Prepare" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="readme.html" class="btn btn-neutral" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Elco Koks.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

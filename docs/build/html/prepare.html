@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Prepare &mdash; WISC 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="WISC 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Analyze" href="analyze.html"/>
+        <link rel="prev" title="Utils" href="utils.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> WISC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Prepare</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-poly-files">Create .poly files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-first-version-of-exposure-table">Create first version of exposure table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extract-buildings-from-openstreetmap">Extract buildings from OpenStreetMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#convert-buildings-table-from-epsg-4326-to-epsg-3035">Convert buildings table from EPSG:4326 to EPSG:3035</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-list-of-storms">Build list of storms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-table-of-maximum-damages">Load table of maximum damages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-fragility-curves">Load fragility curves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-curves-ratios">Load curves ratios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clip-landuse">Clip landuse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clip-openstreetmap-file">Clip OpenStreetMap file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">WISC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Prepare</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/prepare.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="prepare">
+<h1>Prepare<a class="headerlink" href="#prepare" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-poly-files">
+<h2>Create .poly files<a class="headerlink" href="#create-poly-files" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">poly_files</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#poly_files"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function will create the .poly files from the nuts shapefile. These
+.poly files are used to extract data from the openstreetmap files.</p>
+<p>This function is adapted from the OSMPoly function in QGIS.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><p class="first">data_path: base path to location of all files.</p>
+<p class="last">country: string name of country ISO2.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>.poly file for each nuts2 in a new dir in the working directory.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="create-first-version-of-exposure-table">
+<h2>Create first version of exposure table<a class="headerlink" href="#create-first-version-of-exposure-table" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">buildings</code><span class="sig-paren">(</span><em>country</em>, <em>parallel=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#buildings"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>[summary]</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>country {string} – ISO2 code of country to consider.</dd>
+<dt>Keyword Arguments:</dt>
+<dd>parallel {bool} – [description] (default: {True})</dd>
+<dt>Returns:</dt>
+<dd>[type] – [description]</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="extract-buildings-from-openstreetmap">
+<h2>Extract buildings from OpenStreetMap<a class="headerlink" href="#extract-buildings-from-openstreetmap" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">extract_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em>, <em>nuts2=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#extract_buildings"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>[summary]</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>area {[type]} – [description]
+country {string} – ISO2 code of country to consider.</dd>
+<dt>Keyword Arguments:</dt>
+<dd>nuts2 {bool} – [description] (default: {True})</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="convert-buildings-table-from-epsg-4326-to-epsg-3035">
+<h2>Convert buildings table from EPSG:4326 to EPSG:3035<a class="headerlink" href="#convert-buildings-table-from-epsg-4326-to-epsg-3035" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">convert_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#convert_buildings"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Converts the coordinate system from EPSG:4326 to EPSG:3035.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><p class="first">area {string} – name of area (most often NUTS2) for which buildings should be converted to European coordinate system</p>
+<p class="last">country {string} – ISO2 code of country to consider.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>geodataframe – Geopandas dataframe with all buildings of the selected area</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="build-list-of-storms">
+<h2>Build list of storms<a class="headerlink" href="#build-list-of-storms" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">get_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#get_storm_list"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Small function to create a list of with path strings to all storms</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path {string} – string of data path where all data is located.</dd>
+<dt>Returns:</dt>
+<dd>list – list with the path strings of all storms</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="load-table-of-maximum-damages">
+<h2>Load table of maximum damages<a class="headerlink" href="#load-table-of-maximum-damages" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">load_max_dam</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_max_dam"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Small function to load the excel with maximum damages.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path {string} – string of data path where all data is located.</dd>
+<dt>Returns:</dt>
+<dd>dataframe – pandas dataframe with maximum damages per landuse</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="load-fragility-curves">
+<h2>Load fragility curves<a class="headerlink" href="#load-fragility-curves" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">load_curves</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_curves"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Small function to load the csv file with the different fragility curves.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path {string} – string of data path where all data is located.</dd>
+<dt>Returns:</dt>
+<dd>dataframe – pandas dataframe with fragility curves</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="load-curves-ratios">
+<h2>Load curves ratios<a class="headerlink" href="#load-curves-ratios" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">load_sample</code><span class="sig-paren">(</span><em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_sample"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Will load the ratio of each curve and landuse to be used.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>country {string} – ISO2 code of country to consider.</dd>
+<dt>Returns:</dt>
+<dd>tuple – tuple of ratios for the selected country</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="clip-landuse">
+<h2>Clip landuse<a class="headerlink" href="#clip-landuse" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">clip_landuse</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>outrast_lu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#clip_landuse"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clip the landuse from the European Corine Land Cover (CLC) map to the considered country</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path {string} – string of data path where all data is located.
+country {string} – ISO2 code of country to consider.
+outrast_lu {string} – string path to location of Corine Land Cover dataset</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="clip-openstreetmap-file">
+<h2>Clip OpenStreetMap file<a class="headerlink" href="#clip-openstreetmap-file" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.prepare.</code><code class="descname">clip_osm</code><span class="sig-paren">(</span><em>data_path</em>, <em>osm_path</em>, <em>area_poly</em>, <em>area_pbf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#clip_osm"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. 
+This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</p>
+<p>This function uses the osmconvert tool, which can be found at <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Osmconvert">http://wiki.openstreetmap.org/wiki/Osmconvert</a>.</p>
+<p>Either add the directory where this executable is located to your environmental variables or just put it in the ‘scripts’ directory.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><p class="first">osm_path: path string to the osm.pbf file of the continent associated with the country.</p>
+<p>area_poly: path string to the .poly file, made through the ‘create_poly_files’ function.</p>
+<p class="last">area_pbf: path string indicating the final output dir and output name of the new .osm.pbf file.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>a clipped .osm.pbf file.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="analyze.html" class="btn btn-neutral float-right" title="Analyze" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="utils.html" class="btn btn-neutral" title="Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Elco Koks.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
