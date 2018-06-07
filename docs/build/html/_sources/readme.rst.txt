@@ -17,21 +17,14 @@ In case of no access to the GitHub page, the other option would be to copy-paste
 	
    .. code::
 
-		name: RAI_WB
+		name: WISC
 		   dependencies:
 			- python=3.6
 			- gdal
 			- numpy
 			- pandas
-			- shapely
-			- fiona
-			- geopy
 			- geopandas
 			- pathos
 			- rasterio
 			- rasterstats
-			- boltons
-			- matplotlib
-			- cartopy
-
 	
