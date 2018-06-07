@@ -32,7 +32,7 @@ def exposure(data_path,country, parallel = True):
         dataframe -- pandas dataframe with all buildings of the country and potential exposure to wind
     """
 
-    input_ = buildings(country,parallel=False)[:10000]
+    input_ = buildings(country,parallel=False)
 
     #==============================================================================
     # Fill table
