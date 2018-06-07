@@ -1,0 +1,10 @@
+name: py36
+   dependencies:
+        - python=3.6
+        - gdal
+        - numpy
+        - pandas
+        - shapely
+        - geopandas
+        - pathos
+        - rasterstats
