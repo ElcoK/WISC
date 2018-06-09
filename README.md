@@ -1,5 +1,4 @@
-# WISC
-Windstorm Risk Model
+# WISC Windstorm Loss and Risk Model
 
 Python implementation of the WISC (Windstorm Information Service) Loss and Risk model.
 
