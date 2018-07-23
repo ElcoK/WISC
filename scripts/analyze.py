@@ -21,7 +21,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from multiprocessing import Pool,cpu_count
 
-def exposure(country, include_storms = True, parallel = True):
+
+def exposure(country, include_storms = True, parallel = True,save=True):
     """"
     Creation of exposure table of the specified country
     
@@ -67,9 +68,12 @@ def exposure(country, include_storms = True, parallel = True):
             for region in regions:
                 country_table.append(region_exposure(region,True))
 
+    if save == True:
+        gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326').to_file(os.path.join(data_path,'output','exposure_{}.shp'.format(country)))
+    
     return gpd.GeoDataFrame(pd.concat(country_table))
    
-def losses(country, parallel = True, event_set = False):
+def losses(country, parallel = True, event_set = False,save=True):
     """"
     Creation of exposure table of the specified country
     
@@ -115,13 +119,19 @@ def losses(country, parallel = True, event_set = False):
             for region in regions:
                 country_table.append(region_exposure(region,True))
 
+    if save == True:
+        gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326').to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
+
     return gpd.GeoDataFrame(pd.concat(country_table))    
 
 
-def risk(country,path_to_eventset):
+def risk(country,path_to_eventset,save=True):
     """
     Estimate risk based on event set
     """
+    # get data path
+    data_path = load_config()['paths']['data']
+    
     gdf_buildings = losses(country, event_set = True)
     
     storm_name_list = [os.path.join(path_to_eventset,x) for x in os.listdir(path_to_eventset)]
@@ -139,3 +149,8 @@ def risk(country,path_to_eventset):
         output_.append(metrics.auc(X1, F1))
     
     gdf_buildings['Risk'] = output_
+    
+    if save == True:
+        gpd.GeoDataFrame(gdf_buildings,crs='epsg:4326').to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
+
+    return gdf_buildings
