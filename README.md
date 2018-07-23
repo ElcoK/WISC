@@ -4,6 +4,33 @@ Python implementation of the WISC (Windstorm Information Service) Loss and Risk 
 
 Please refer to the [ReadTheDocs](http://wisc.readthedocs.io/) of this project for the full documentation of all functions. 
 
+Copy `config.template.json` to `config.json` and edit the paths for data and
+figures, for example:
+
+```json
+{
+    "data_path": "/home/<user>/projects/WISC/data",
+    "figures_path": "/home/<user>/projects/WISC/figures"
+}
+```
+
+## Python requirements
+
+Recommended option is to use a [miniconda](https://conda.io/miniconda.html)
+environment to work in for this project, relying on conda to handle some of the
+trickier library dependencies.
+
+```bash
+
+# Add conda-forge channel for extra packages
+conda config --add channels conda-forge
+
+# Create a conda environment for the project and install packages
+conda env create -f environment.yml
+activate WISC
+
+```
+
 **Requirements:** [NumPy](http://www.numpy.org/), [pandas](https://pandas.pydata.org/), [geopandas](http://geopandas.org/), [seaborn](https://seaborn.pydata.org/), [matplotlib](https://matplotlib.org/)
 
 **Core Report:** [Koks et al., 2017](https://wisc.climate.copernicus.eu/wisc/documents/shared/C3S_WISC_Tier%203_Indicator_Descriptions_v1.0.pdf)
