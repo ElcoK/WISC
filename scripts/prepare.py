@@ -6,62 +6,177 @@ Created on Mon Jun  4 20:48:26 2018
 """
 
 import os
+import sys
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import subprocess
+import rasterio as rio
+from osgeo import ogr
+import shapely.wkt
+from rasterstats import point_query
 
-from utils import load_config
+sys.path.append(os.path.join( '..'))
+from scripts.utils import load_config,get_num
 
-def buildings(country, parallel = True):
-    """[summary]
+def region_exposure(region,include_storms=True,event_set=False):
+    """Get exposure data for single region 
     
     Arguments:
-       country {string} -- ISO2 code of country to consider.
-    
-    Keyword Arguments:
-       parallel {bool} -- [description] (default: {True})
-    
+       region {string} -- NUTS2 code of region to consider.
+   
     Returns:
-        [type] -- [description]
-    """
+        GeoDataFrame -- [description]
+    """    
     
-    # get data path
-    data_path = load_config()['paths']['data']
-
-    # create country poly files
-    poly_files(data_path,country)
+    country = region[:2]
     
-    #get list of regions for which we have poly files (should be all) 
-    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
-    regions = [x.split('.')[0] for x in regions]
-    
-    # set path of osm countr file:
+    data_path = load_config()['paths']['data']    
+   
     osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
     
-    if parallel == True:
-        None
-    else:
-        country_table = []
-        for region in regions:
-            region_poly = os.path.join(data_path,country,'NUTS2_POLY','{}.poly'.format(region))
-            region_pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
-            
-            # clip osm to nuts2 region
-            clip_osm(data_path,osm_path,region_poly,region_pbf)
+    area_poly = os.path.join(data_path,country,'NUTS2_POLY','{}.poly'.format(region))
+    area_pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
     
-            # extract buildings for the region
-            extract_buildings(region,country)            
-            
-            # convert buildings to epsg:3035, making it compatible with landuse maps
-            nuts2_buildings = convert_buildings(region,country)
-            nuts2_buildings['NUTS2_ID'] = region
-            country_table.append(nuts2_buildings)
+    clip_osm(data_path,osm_path,area_poly,area_pbf)   
     
-    country_table = gpd.GeoDataFrame(pd.concat(country_table))
-    
-    return country_table
+    gdf_table = fetch_roads(data_path,country,region,regional=True)
 
+    # convert to european coordinate system for overlap
+    gdf_table = gdf_table.to_crs(epsg=3035)
+
+    # Specify Country
+    gdf_table["COUNTRY"] = country
+    
+    # Calculate area
+    gdf_table["AREA_m2"] = gdf_table.geometry.area
+
+    # Determine centroid
+    gdf_table["centroid"] = gdf_table.geometry.centroid
+
+    # Get land use
+    nuts_eu = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
+    nuts_eu.loc[nuts_eu['NUTS_ID']==country].to_file(os.path.join(data_path,
+                                country,'NUTS2_SHAPE','{}.shp'.format(country)))
+    CLC_2012 = os.path.join(data_path,country,'NUTS2_LANDUSE','{}_LANDUSE.tif'.format(country))
+    clip_landuse(data_path,country,CLC_2012)
+
+    gdf_table['CLC_2012'] = point_query(list(gdf_table['centroid']),CLC_2012,nodata=-9999,interpolate='nearest')
+
+    if (include_storms == True) & (event_set == False):
+        storm_list = get_storm_list(data_path)
+        for outrast_storm in storm_list:
+            print(outrast_storm)
+            storm_name = str(get_num(outrast_storm[-23:]))
+            gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+
+    if (include_storms == True) & (event_set == True):
+        storm_list = get_event_storm_list(data_path)
+        for outrast_storm in storm_list:
+            storm_name = str(get_num(outrast_storm[-23:]))
+            gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+
+
+    return gdf_table        
+
+def region_losses(region,storm_event_set=False):
+    """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
+    
+    Arguments:
+        data_path {string} -- string of data path where all data is located.
+        country {string} -- ISO2 code of country to consider.
+    
+    Keyword Arguments:
+        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+    
+    Returns:
+        dataframe -- pandas dataframe with all buildings of the country and their losses for each wind storm
+
+    """ 
+    
+    data_path = load_config()['paths']['data']    
+    
+    country = region[:2]
+
+    #load storms
+    if storm_event_set == False:
+        storm_list = get_storm_list(data_path)
+        storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
+    else:
+        None
+
+    #load max dam
+    max_dam = load_max_dam(data_path)
+  
+    #load curves
+    curves = load_curves(data_path)
+
+    #load sample
+    sample = load_sample(country)
+    
+    output_table = region_exposure(region,include_storms=True,event_set=event_set)
+
+    no_storm_columns = list(set(output_table.columns).difference(list(storm_name_list)))
+    write_output = pd.DataFrame(output_table[no_storm_columns])
+
+    for storm in storm_name_list:
+    ##==============================================================================
+    ## Calculate losses for buildings in this NUTS region
+    ##==============================================================================
+        max_dam_country = np.asarray(max_dam[max_dam['CODE'].str.contains(country)].iloc[:,1:],dtype='int16')    
+    
+        df_C2 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+        df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+        df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+    
+        df_C2[storm+'_curve'] = df_C2[storm].map(curves['C2']) 
+        df_C3[storm+'_curve'] = df_C3[storm].map(curves['C3'])
+        df_C4[storm+'_curve'] = df_C4[storm].map(curves['C4']) 
+     
+        #specify shares for urban and nonurban        
+        RES_URB = 1 - sample[3]/100 
+        IND_URB = sample[3]/100   
+    
+        RES_NONURB = 0.5
+        IND_NONURB = 0.5
+    
+        # Use pandas where to fill new column for losses
+        df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(0,12, inclusive=True), (df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[0]/100), 0)
+        df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(13,23, inclusive=True), (df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[0]/100),df_C2['Loss'])
+    
+        df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(0,12, inclusive=True), (df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[1]/100), 0)
+        df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(13,23, inclusive=True), (df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[1]/100),df_C3['Loss'])
+    
+        df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
+        df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
+
+#        # and write output                    
+        write_output[storm] = (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))
+
+    return(gpd.GeoDataFrame(write_output))
+
+
+def storm_exposure(gdf_table):
+    
+    data_path = load_config()['paths']['data']    
+    #==============================================================================
+    # Loop through storms
+    #==============================================================================
+    storm_list = get_storm_list(data_path)
+    for outrast_storm in storm_list:
+        print(outrast_storm)
+        storm_name = str(get_num(outrast_storm[-23:]))
+        gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')
+
+    return gdf_table
+
+def get_storm_data(storm_path):
+    with rio.open(storm_path) as src:    
+        # Read as numpy array
+        array = src.read(1)
+        array = np.array(array,dtype='float32')
+        affine_storm = src.affine
+    return array,affine_storm
 
 def extract_buildings(area,country,nuts2=True):
     """[summary]
@@ -182,6 +297,40 @@ def load_sample(country):
                          ('UK', ( 5,30,65,50))])
 
     return dict_[country]
+
+def load_osm_data(data_path,country,region='',regional=False):
+    if regional==False:
+        osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
+    else:
+        osm_path = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
+        
+
+    driver=ogr.GetDriverByName('OSM')
+    return driver.Open(osm_path)
+
+def fetch_roads(data_path,country,region='',regional=False):
+    """
+    This function directly reads the building data from osm, instead of first converting it to a shapefile
+    """
+    data = load_osm_data(data_path,country,region='',regional=False)
+    
+    sql_lyr = data.ExecuteSQL("SELECT osm_id,building,amenity from multipolygons where building is not null")
+    
+    roads=[]
+    for feature in sql_lyr:
+        if feature.GetField('building') is not None:
+            osm_id = feature.GetField('osm_id')
+            shapely_geo = shapely.wkt.loads(feature.geometry().ExportToWkt()) 
+            if shapely_geo is None:
+                continue
+            highway=feature.GetField('building')
+            amenity=feature.GetField('amenity')
+            roads.append([osm_id,highway,amenity,shapely_geo])
+    
+    if len(roads) > 0:
+        return gpd.GeoDataFrame(roads,columns=['osm_id','building','amenity','geometry'],crs={'init': 'epsg:4326'})
+    else:
+        print('No buildings in {}'.format(country))
     
 def poly_files(data_path,country):
 
