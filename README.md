@@ -4,6 +4,8 @@ Python implementation of the WISC (Windstorm Information Service) Loss and Risk 
 
 Please refer to the [ReadTheDocs](http://wisc.readthedocs.io/) of this project for the full documentation of all functions. 
 
+## Prepare data paths
+
 Copy `config.template.json` to `config.json` and edit the paths for data and
 figures, for example:
 
