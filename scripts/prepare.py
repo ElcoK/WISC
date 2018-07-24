@@ -79,6 +79,8 @@ def region_exposure(region,include_storms=True,event_set=False):
 
     return gdf_table        
 
+
+
 def region_losses(region,storm_event_set=False):
     """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
     
@@ -247,6 +249,19 @@ def get_storm_list(data_path):
                 storm_list.append(resample_storm)    
 
     return storm_list
+
+def get_event_storm_list(data_path):
+    storm_list = []
+    for root, dirs, files in os.walk(os.path.join(data_path,'event_set')):
+        for file in files:
+            if file.endswith('.tif'):
+                fname = os.path.join(data_path,'event_set',file)
+                (filepath, filename_storm) = os.path.split(fname) 
+                (fileshortname_storm, extension) = os.path.splitext(filename_storm) 
+                resample_storm =  os.path.join(data_path,'event_set',fileshortname_storm+'.tif')
+                storm_list.append(resample_storm)    
+
+    return storm_list    
 
 def load_max_dam(data_path):
     """Small function to load the excel with maximum damages.

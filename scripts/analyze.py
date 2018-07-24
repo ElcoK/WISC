@@ -106,7 +106,7 @@ def losses(country, parallel = True, event_set = False,save=True):
         else:
             country_table = []
             for region in regions:
-                country_table.append(region_exposure(region,True))
+                country_table.append(region_losses(region,False))
 
     elif event_set == True:
         event_set = len(regions)*[True]
@@ -117,7 +117,7 @@ def losses(country, parallel = True, event_set = False,save=True):
         else:
             country_table = []
             for region in regions:
-                country_table.append(region_exposure(region,True))
+                country_table.append(region_losses(region,True))
 
     if save == True:
         gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326').to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
