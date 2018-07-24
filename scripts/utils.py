@@ -9,6 +9,7 @@ import os
 import json
 import shutil
 from datetime import date
+import urllib.request
 
 def load_config():
     """Read config.json
@@ -96,3 +97,22 @@ def get_num(x):
         x {[type]} -- [description]
     """
     return int(''.join(ele for ele in x if ele.isdigit()))
+
+def country_dict_geofabrik():
+    
+    countries = ['CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    countries_geofabrik = ['czech-republic','switzerland','estonia','lithuania','portugal','spain',
+                           'austria','belgium','denmark','ireland-and-northern-ireland','netherlands','sweden',
+                           'united-kingdom','poland','italy','finland','france','germany']
+
+    return dict(zip(countries,countries_geofabrik))
+
+def download_osm_file(country):
+    lookup = country_dict_geofabrik()
+    
+    data_path = load_config()['paths']['data']
+    osm_path_in = os.path.join(data_path,'OSM')
+    
+    url = 'http://download.geofabrik.de/europe/{}.html'.format(lookup[country])
+    if '%s-latest.osm.pbf' % (country) not in  os.listdir(osm_path_in):
+                urllib.request.urlretrieve(url, osm_path_in)

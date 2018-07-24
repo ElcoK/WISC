@@ -11,8 +11,9 @@ from SALib.test_functions import Ishigami
 import numpy as np
 import os
 import multiprocessing
-from sens_basescript import run_script
+#from sens_basescript import run_script
 import time
+
 
 if __name__ == '__main__':
 
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     num_cores = multiprocessing.cpu_count()-2
     
     # specify country
-    countries = ['','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    countries = ['CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
     
     # set parameters for sensitivity analysis
     problem = {
@@ -50,10 +51,10 @@ if __name__ == '__main__':
             for storm in storm_name_list:
                 if storm in file:
                     storm_list.append(curdir+'\\STORMS\\'+file)
-
-    countries_out = []
-    for country in countries:
-        start = time.time()
-        out = run_script(country,storm_list,param_values,version=None,delete=False)
-        end = time.time()
-        countries_out.append(out)
+#
+#    countries_out = []
+#    for country in countries:
+#        start = time.time()
+#        out = run_script(country,storm_list,param_values,version=None,delete=False)
+#        end = time.time()
+#        countries_out.append(out)

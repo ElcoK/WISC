@@ -116,7 +116,7 @@ def region_losses(region,storm_event_set=False):
     #load sample
     sample = load_sample(country)
     
-    output_table = region_exposure(region,include_storms=True,event_set=event_set)
+    output_table = region_exposure(region,include_storms=True,event_set=storm_event_set)
 
     no_storm_columns = list(set(output_table.columns).difference(list(storm_name_list)))
     write_output = pd.DataFrame(output_table[no_storm_columns])

@@ -12,22 +12,30 @@ import pandas as pd
 from rasterstats import point_query
 
 sys.path.append(os.path.join( '..'))
-from scripts.prepare import get_storm_list,load_max_dam,load_curves,load_sample,region_exposure,region_losses,poly_files
+from scripts.prepare import get_storm_list,load_max_dam,load_curves,load_sample,region_exposure,region_losses,poly_files,download_osm_file
 from scripts.utils import get_num,load_config
 from sklearn import metrics
+
+import country_converter as coco
+cc = coco.CountryConverter()
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from multiprocessing import Pool,cpu_count
 
+def all_countries():
+    
+    # specify country
+    countries = ['CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    
 
 def exposure(country, include_storms = True, parallel = True,save=True):
     """"
     Creation of exposure table of the specified country
     
     Arguments:
-        country {string} -- ISO2 code of country to consider.
+        country {string} -- country to consider.
     
     Keyword Arguments:
         parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
@@ -35,12 +43,18 @@ def exposure(country, include_storms = True, parallel = True,save=True):
     Returns:
         dataframe -- pandas dataframe with all buildings of the country and potential exposure to wind
     """
+    
+    #make sure the country inserted is an ISO2 country name for he remainder of the analysis
+    country = coco.convert(names=country, to='ISO2')
 
     # get data path
     data_path = load_config()['paths']['data']
 
     # create country poly files
     poly_files(data_path,country)
+    
+    #download OSM file if it is not there yet:
+    download_osm_file(country)
     
     #get list of regions for which we have poly files (should be all) 
     regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
@@ -78,7 +92,7 @@ def losses(country, parallel = True, event_set = False,save=True):
     Creation of exposure table of the specified country
     
     Arguments:
-        country {string} -- ISO2 code of country to consider.
+        country {string} -- country to consider.
     
     Keyword Arguments:
         parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
@@ -87,11 +101,17 @@ def losses(country, parallel = True, event_set = False,save=True):
         dataframe -- pandas dataframe with all buildings of the country and potential exposure to wind
     """
 
+    #make sure the country inserted is an ISO2 country name for he remainder of the analysis
+    country = coco.convert(names=country, to='ISO2')
+
     # get data path
     data_path = load_config()['paths']['data']
 
     # create country poly files
     poly_files(data_path,country)
+    
+    #download OSM file if it is not there yet:
+    download_osm_file(country)
     
     #get list of regions for which we have poly files (should be all) 
     regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
