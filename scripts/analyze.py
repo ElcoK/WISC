@@ -12,8 +12,8 @@ import pandas as pd
 from rasterstats import point_query
 
 sys.path.append(os.path.join( '..'))
-from scripts.prepare import get_storm_list,load_max_dam,load_curves,load_sample,region_exposure,region_losses,poly_files,download_osm_file
-from scripts.utils import get_num,load_config
+from scripts.prepare import get_storm_list,load_max_dam,load_curves,load_sample,region_exposure,region_losses,poly_files
+from scripts.utils import get_num,load_config,download_osm_file
 from sklearn import metrics
 
 import country_converter as coco
@@ -24,11 +24,23 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from multiprocessing import Pool,cpu_count
 
-def all_countries():
+def all_countries_losses():
     
     # specify country
-    countries = ['CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
     
+    for country in countries:
+        losses(country, include_storms = True, parallel = False) 
+        
+def all_countries_exposure():
+    
+    # specify country
+    countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    
+#    countries_append = []
+    for country in countries:    
+       exposure(country, include_storms = True, parallel = False) 
+        
 
 def exposure(country, include_storms = True, parallel = True,save=True):
     """"
@@ -83,9 +95,12 @@ def exposure(country, include_storms = True, parallel = True,save=True):
                 country_table.append(region_exposure(region,True))
 
     if save == True:
-        gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326').to_file(os.path.join(data_path,'output','exposure_{}.shp'.format(country)))
+        gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
+        gdf_table.drop(['centroid'],axis='columns',inplace=True)
+
+        gdf_table.to_file(os.path.join(data_path,'output','exposure_{}.shp'.format(country)))
     
-    return gpd.GeoDataFrame(pd.concat(country_table))
+    return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
    
 def losses(country, parallel = True, event_set = False,save=True):
     """"
@@ -140,9 +155,12 @@ def losses(country, parallel = True, event_set = False,save=True):
                 country_table.append(region_losses(region,True))
 
     if save == True:
-        gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326').to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
+        gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
+        gdf_table.drop(['centroid'],axis='columns',inplace=True)
 
-    return gpd.GeoDataFrame(pd.concat(country_table))    
+        gdf_table.to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
+    
+    return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')    
 
 
 def risk(country,path_to_eventset,save=True):
@@ -171,6 +189,8 @@ def risk(country,path_to_eventset,save=True):
     gdf_buildings['Risk'] = output_
     
     if save == True:
-        gpd.GeoDataFrame(gdf_buildings,crs='epsg:4326').to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
+        gdf_buildings.drop(['centroid'],axis='columns',inplace=True)
 
+        gdf_buildings.to_file(os.path.join(data_path,'output','risk_{}.shp'.format(country)))
+    
     return gdf_buildings

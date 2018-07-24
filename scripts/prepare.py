@@ -76,12 +76,12 @@ def region_exposure(region,include_storms=True,event_set=False):
             storm_name = str(get_num(outrast_storm[-23:]))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
-
+    gdf_table.drop(['centroid'],axis='columns',inplace=True)
     return gdf_table        
 
 
 
-def region_losses(region,storm_event_set=False):
+def region_losses(region,storm_event_set=False,sens_analysis=False):
     """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
     
     Arguments:

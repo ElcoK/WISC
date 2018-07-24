@@ -100,8 +100,8 @@ def get_num(x):
 
 def country_dict_geofabrik():
     
-    countries = ['CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
-    countries_geofabrik = ['czech-republic','switzerland','estonia','lithuania','portugal','spain',
+    countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    countries_geofabrik = ['luxembourg','czech-republic','switzerland','estonia','lithuania','portugal','spain',
                            'austria','belgium','denmark','ireland-and-northern-ireland','netherlands','sweden',
                            'united-kingdom','poland','italy','finland','france','germany']
 
@@ -111,8 +111,9 @@ def download_osm_file(country):
     lookup = country_dict_geofabrik()
     
     data_path = load_config()['paths']['data']
-    osm_path_in = os.path.join(data_path,'OSM')
+    osm_path  = os.path.join(data_path,'OSM')
+    osm_path_in = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country) )
     
-    url = 'http://download.geofabrik.de/europe/{}.html'.format(lookup[country])
-    if '%s-latest.osm.pbf' % (country) not in  os.listdir(osm_path_in):
+    url = 'http://download.geofabrik.de/europe/{}-latest.osm.pbf'.format(lookup[country])
+    if '{}.osm.pbf'.format(country) not in os.listdir(osm_path):
                 urllib.request.urlretrieve(url, osm_path_in)
