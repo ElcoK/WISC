@@ -9,11 +9,10 @@ import sys
 import numpy as np
 import geopandas as gpd
 import pandas as pd
-from rasterstats import point_query
 
 sys.path.append(os.path.join( '..'))
-from scripts.prepare import get_storm_list,load_max_dam,load_curves,load_sample,region_exposure,region_losses,poly_files
-from scripts.utils import get_num,load_config,download_osm_file
+from scripts.functions import region_exposure,region_losses,poly_files,load_sample
+from scripts.utils import load_config,download_osm_file
 from sklearn import metrics
 
 import country_converter as coco
@@ -97,7 +96,6 @@ def exposure(country, include_storms = True, parallel = True,save=True):
     if save == True:
         gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
         gdf_table.drop(['centroid'],axis='columns',inplace=True)
-
         gdf_table.to_file(os.path.join(data_path,'output','exposure_{}.shp'.format(country)))
     
     return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
@@ -127,6 +125,9 @@ def losses(country, parallel = True, event_set = False,save=True):
     
     #download OSM file if it is not there yet:
     download_osm_file(country)
+
+    #load sample
+    sample = load_sample(country)
     
     #get list of regions for which we have poly files (should be all) 
     regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
@@ -134,30 +135,31 @@ def losses(country, parallel = True, event_set = False,save=True):
     
     if event_set == False:
         event_set = len(regions)*[False]
+        samples = len(regions)*[sample]
     
         if parallel == True:
             with Pool(cpu_count()-2) as pool: 
-                country_table = pool.starmap(region_losses,zip(regions,event_set),chunksize=1) 
+                country_table = pool.starmap(region_losses,zip(regions,event_set,samples),chunksize=1) 
         else:
             country_table = []
             for region in regions:
-                country_table.append(region_losses(region,False))
+                country_table.append(region_losses(region,False,sample))
 
     elif event_set == True:
         event_set = len(regions)*[True]
+        samples = len(regions)*[sample]
     
         if parallel == True:
             with Pool(cpu_count()-2) as pool: 
-                country_table = pool.starmap(region_losses,zip(regions,event_set),chunksize=1) 
+                country_table = pool.starmap(region_losses,zip(regions,event_set,samples),chunksize=1) 
         else:
             country_table = []
             for region in regions:
                 country_table.append(region_losses(region,True))
 
     if save == True:
-        gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
+        gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326',geometry='geometry')
         gdf_table.drop(['centroid'],axis='columns',inplace=True)
-
         gdf_table.to_file(os.path.join(data_path,'output','losses_{}.shp'.format(country)))
     
     return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')    

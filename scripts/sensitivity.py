@@ -14,6 +14,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib
 import numpy as np
+from multiprocessing import Pool,cpu_count
+
+sys.path.append(os.path.join( '..'))
+from scripts.functions import region_sens_analysis,poly_files
+from scripts.utils import load_config,download_osm_file
+
+import country_converter as coco
+cc = coco.CountryConverter()
 
 matplotlib.style.use('ggplot')
 
@@ -22,9 +30,46 @@ matplotlib.rcParams['font.family'] = 'tahoma'
 matplotlib.rcParams['axes.labelsize'] = 14.
 matplotlib.rcParams['xtick.labelsize'] = 12.
 matplotlib.rcParams['ytick.labelsize'] = 12.
-sys.path.append(os.path.join( '..'))
-from scripts.utils import load_config
 
+
+def calculate(country,parallel=True,save=True):
+
+    # set data path    
+    data_path = load_config()['paths']['data']
+    
+    #make sure the country inserted is an ISO2 country name for he remainder of the analysis
+    country = coco.convert(names=country, to='ISO2')
+
+    # get data path
+    data_path = load_config()['paths']['data']
+
+    # create country poly files
+    poly_files(data_path,country)
+    
+    #download OSM file if it is not there yet:
+    download_osm_file(country)
+
+    samples,storm_list = prepare_sens_analysis()
+
+    #get list of regions for which we have poly files (should be all) 
+    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
+    regions = [x.split('.')[0] for x in regions]
+    
+    #region_sens_analysis(region,samples,sens_analysis_storms=[],save=True)
+    if parallel == True:
+        samples = len(regions)*[samples]
+        storms = len(regions)*[storm_list]
+        save = len(regions)*[save]
+        
+        with Pool(cpu_count()-2) as pool: 
+            country_table = pool.starmap(region_sens_analysis,zip(regions,samples,storms,save),chunksize=1) 
+    else:
+        country_table = []
+        for region in regions:
+            country_table.append(region_sens_analysis(region,samples,storms,save))
+    
+    return country_table            
+                
 def prepare_sens_analysis(storm_name_list=[]):
     
     data_path = load_config()['paths']['data']
