@@ -1,4 +1,4 @@
-name: py36
+name: WISC
 
    dependencies:
         - python=3.6
