@@ -18,7 +18,8 @@ In case of no access to the GitHub page, the other option would be to copy-paste
    .. code::
 
 		name: WISC
-		   dependencies:
+		
+		dependencies:
 			- python=3.6
 			- gdal
 			- numpy
