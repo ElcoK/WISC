@@ -14,3 +14,5 @@ dependencies:
         - basemap
         - SALib
         - urllib3
+        - scikit-learn
+        - xlrd
