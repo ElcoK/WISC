@@ -29,7 +29,7 @@ def all_countries_losses():
     countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
     
     for country in countries:
-        losses(country, include_storms = True, parallel = False) 
+        losses(country, parallel = False) 
         
 def all_countries_exposure():
     
