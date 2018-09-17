@@ -13,4 +13,4 @@ dependencies:
         - matplotlib
         - basemap
         - SALib
-        - urllib
+        - urllib3
