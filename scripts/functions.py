@@ -555,3 +555,61 @@ def load_sens_analysis_storms(sens_analysis_storms=[]):
             for storm in storm_name_list:
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
+                    
+def summary_statistics():
+    
+    countries = ['AT','BE','DK','FR','DE','IE','LU','NL','NO','SE','UK','PL','IT','FI'] 
+
+    first_line = pd.read_csv(curdir+'//LU//LU000_tier2.csv', nrows=1)
+    extract = first_line.columns.tolist()[2:]
+    storm_name_list = extract[6:]
+    
+    output_storms = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+    output_storms_res = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+    output_storms_ind_com = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+
+    output_storms_transport = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+    output_storms_other = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+    output_storms_agri = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
+
+    for country in countries:
+       output_table = pd.DataFrame()
+       for root, dirs, files in os.walk(curdir+'//%s//' % country):
+           for file in files:
+                output_table = pd.read_csv(curdir+'//%s//' % country +file, usecols=extract)
+                output_table = output_table.replace([np.inf, -np.inf], np.nan).dropna(how='all')
+                output_table = output_table.reset_index(inplace=False)
+                # TOTAL
+                output_storms[country] += (output_table[storm_name_list].sum(axis=0)/1000000)
+                # RESIDENTIAL
+                res = output_table[output_table.CLC_2012 < 3]
+                output_storms_res[country] += (res[storm_name_list].sum(axis=0)/1000000)     
+                # COM/IND
+                ind_com = output_table[output_table.CLC_2012 == 3]
+                output_storms_ind_com[country] += (ind_com[storm_name_list].sum(axis=0)/1000000)
+                # TRANSPORT,PORTS,AIRPORTS
+                transport = output_table.loc[np.where(output_table['CLC_2012'].between(4,6, inclusive=True))[0]]
+                output_storms_transport[country] += (transport[storm_name_list].sum(axis=0)/1000000)
+                # OTHER BUILT-UP
+                other = output_table.loc[np.where(output_table['CLC_2012'].between(7,12, inclusive=True))[0]]
+                output_storms_other[country] += (other[storm_name_list].sum(axis=0)/1000000)
+                # AGRICULTURAL BUILDINGS
+                agri = output_table[output_table.CLC_2012 > 12]
+                output_storms_agri[country] += (agri[storm_name_list].sum(axis=0)/1000000)
+#                
+    
+    output_storms['Sum'] = output_storms.sum(axis=1)
+    output_storms_res['Sum'] = output_storms_res.sum(axis=1)
+    output_storms_ind_com['Sum'] = output_storms_ind_com.sum(axis=1)
+    output_storms_transport['Sum'] = output_storms_transport.sum(axis=1)
+    output_storms_other['Sum'] = output_storms_other.sum(axis=1)
+    output_storms_agri['Sum'] = output_storms_agri.sum(axis=1)
+
+    out = pd.ExcelWriter('output_storms.xlsx')
+    output_storms.to_excel(out,sheet_name='total_losses')
+    output_storms_res.to_excel(out,sheet_name='res_losses')
+    output_storms_ind_com.to_excel(out,sheet_name='ind_com_losses')
+    output_storms_transport.to_excel(out,sheet_name='transport_losses')
+    output_storms_other.to_excel(out,sheet_name='other_losses')
+    output_storms_agri.to_excel(out,sheet_name='agri_losses')
+    out.save()

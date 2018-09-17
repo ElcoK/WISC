@@ -55,7 +55,6 @@ def calculate(country,parallel=True,save=True):
     regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
     regions = [x.split('.')[0] for x in regions]
     
-    #region_sens_analysis(region,samples,sens_analysis_storms=[],save=True)
     if parallel == True:
         samples = len(regions)*[samples]
         storms = len(regions)*[storm_list]
@@ -175,6 +174,7 @@ def read_outcomes_sens_analysis():
                 out += out2
             k += 2  
         param_values = pd.read_csv(os.path.join(data_path,'output_sens',country_list[1]),delim_whitespace=True, header=None)
+        
         #Estimate outcome of sensitvity analysis    
         param_values = np.asarray(param_values)
         for l in range(5):

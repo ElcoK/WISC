@@ -36,10 +36,8 @@ def all_countries_exposure():
     # specify country
     countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
     
-#    countries_append = []
     for country in countries:    
        exposure(country, include_storms = True, parallel = False) 
-        
 
 def exposure(country, include_storms = True, parallel = True,save=True):
     """"
