@@ -8,4 +8,9 @@ dependencies:
         - shapely
         - geopandas
         - pathos
+        - rasterio
         - rasterstats
+        - matplotlib
+        - basemap
+        - SALib
+        - urllib
