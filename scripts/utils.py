@@ -20,7 +20,7 @@ def load_config():
     return config
 
 def clean_dir(dirpath):
-    """"This function can be used to fully clear a directory
+    """This function can be used to fully clear a directory
     
     Arguments:
         dirpath {string} -- path to directory to be cleared from files
@@ -59,18 +59,14 @@ def create_folder_structure(data_path,country):
     
     if not os.path.exists(os.path.join(data_path,country)):
         os.makedirs(os.path.join(data_path,country))
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_SHAPE')):
-        os.makedirs(os.path.join(data_path,country,'NUTS2_SHAPE'))
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_OUTPUT')):
-        os.makedirs(os.path.join(data_path,country,'NUTS2_OUTPUT'))
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_LANDUSE')):        
-        os.makedirs(os.path.join(data_path,country,'NUTS2_LANDUSE'))        
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_OSM')):        
-        os.makedirs(os.path.join(data_path,country,'NUTS2_OSM')) 
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_POLY')):        
-        os.makedirs(os.path.join(data_path,country,'NUTS2_POLY')) 
-    if not os.path.exists(os.path.join(data_path,country,'NUTS2_BUILDINGS')):        
-        os.makedirs(os.path.join(data_path,country,'NUTS2_BUILDINGS')) 
+    if not os.path.exists(os.path.join(data_path,country,'NUTS3_SHAPE')):
+        os.makedirs(os.path.join(data_path,country,'NUTS3_SHAPE'))
+    if not os.path.exists(os.path.join(data_path,country,'NUTS3_LANDUSE')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS3_LANDUSE'))        
+    if not os.path.exists(os.path.join(data_path,country,'NUTS3_OSM')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS3_OSM')) 
+    if not os.path.exists(os.path.join(data_path,country,'NUTS3_POLY')):        
+        os.makedirs(os.path.join(data_path,country,'NUTS3_POLY')) 
 
     if not os.path.exists(os.path.join(data_path,'exposure_country')):        
         os.makedirs(os.path.join(data_path,'exposure_country'))        
@@ -80,11 +76,14 @@ def create_folder_structure(data_path,country):
         os.makedirs(os.path.join(data_path,'output_exposure'))        
     if not os.path.exists(os.path.join(data_path,'output_losses')):        
         os.makedirs(os.path.join(data_path,'output_losses')) 
+    if not os.path.exists(os.path.join(data_path,'output_risk')):        
+        os.makedirs(os.path.join(data_path,'output_risk')) 
     if not os.path.exists(os.path.join(data_path,'output_exposure',country)):        
         os.makedirs(os.path.join(data_path,'output_exposure',country)) 
     if not os.path.exists(os.path.join(data_path,'output_losses',country)):        
         os.makedirs(os.path.join(data_path,'output_losses',country)) 
-
+    if not os.path.exists(os.path.join(data_path,'output_risk',country)):        
+        os.makedirs(os.path.join(data_path,'output_risk',country)) 
 
 def int2date(argdate: int):
     """
@@ -103,23 +102,42 @@ def int2date(argdate: int):
     return date(year, month, day)
 
 def get_num(x):
-    """[summary]
+    """Grab all integers from string
     
     Arguments:
         x {[type]} -- [description]
+        
+    Returns:
+        Integer created from string
     """
+    
     return int(''.join(ele for ele in x if ele.isdigit()))
 
 def country_dict_geofabrik():
+    """ Create a dictionary to convert ISO2 codes to Geofabrik country names
     
+    Returns:
+        A lookup dictionary between ISO2 codes and Geofabrik country names
+    
+    """
+   
     countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
-    countries_geofabrik = ['luxembourg','czech-republic','switzerland','estonia','lithuania','portugal','spain',
+    countries_geofabrik = ['luxembourg','czech-republic','switzerland','estonia','lithuania','latvia','portugal','spain',
                            'austria','belgium','denmark','ireland-and-northern-ireland','netherlands','sweden',
                            'united-kingdom','poland','italy','finland','france','germany']
 
     return dict(zip(countries,countries_geofabrik))
 
 def download_osm_file(country):
+    """ Download OSM file from Geofabrik
+    
+    Arguments:
+        country {string} -- ISO2 string code of country
+        
+    Returns:
+        downloaded OSM file
+    """
+    
     lookup = country_dict_geofabrik()
     
     data_path = load_config()['paths']['data']

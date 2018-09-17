@@ -10,8 +10,15 @@ import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 import geopandas as gpd
+
+from mpl_toolkits.basemap import Basemap
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
+from matplotlib.colors import Normalize
+from matplotlib import colors
+import matplotlib.cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # make connection to all the scripts
 sys.path.append(os.path.join( '..'))
@@ -90,7 +97,7 @@ def loss_per_sector(figure_output_path='test_sector.png'):
     loss_per_sector = pd.DataFrame(columns=sectors,index=loss_per_year.index) 
     
     for sect in sectors:
-        sect_loss = pd.read_excel('output_storms.xlsx',sheetname=sect+'_losses') 
+        sect_loss = pd.read_excel(os.path.join(data_path,'output_storms.xlsx'),sheetname=sect+'_losses') 
         sect_loss = sect_loss[cols_to_load]
         sect_loss['Storm'] = pd.to_datetime(sect_loss['Storm'])
         sect_loss.set_index('Storm', inplace=True) 
@@ -114,8 +121,8 @@ def loss_per_sector(figure_output_path='test_sector.png'):
     
     plt.savefig(figure_output_path,dpi=600,bbox_inches='tight')
     
-def risk_map():
-    """This function is used to plot the total losses for the following sectors: Residential,Industrial/Commercial,Transport,Other uses,Agriculture.
+def risk_map(figure_output_path='test_risk_map.png'):
+    """This function is used to create a map with the total risk per region.
     
     Arguments:
         figure_output_path {string} -- path to location where you want to save the figure
@@ -124,36 +131,75 @@ def risk_map():
         A saved figure
     """
 
-    # make connection to the data paths
     data_path = load_config()['paths']['data']
-    #read data
-    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+    countries = ['LU','AT','BE','DK','FR','DE','IE','NL','NO','SE','UK','PL','IT','FI','CH','EE','LV','LT','PT','ES','CZ'] 
+
+    NUTS3 = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
+    NUTS3 = NUTS3.to_crs(epsg=4326)
+    NUTS3 = NUTS3[NUTS3.STAT_LEVL_==3]
+    NUTS3['Sum'] = 0
+   
+    for country in countries:
+        output_table = pd.DataFrame()
+        for root, dirs, files in os.walk(os.path.join("F:\Dropbox\VU_DATA\WISC","output_risk",country)):
+            for file in files:
+                nuts_name = file[:-9]
+                output_table = pd.DataFrame(pd.read_csv(os.path.join("F:\Dropbox\VU_DATA\WISC","output_risk",country,file),index_col=0,encoding='cp1252')['Risk'])
+                output_table['Risk'] = output_table['Risk'].astype(float)
+
+                output_table = output_table.replace([np.inf, -np.inf], np.nan).dropna(how='all')
+                output_table.loc[output_table.Risk<0.5] = 0
+                # TOTAL
+                NUTS3.loc[NUTS3.NUTS_ID==nuts_name,'Sum'] = output_table['Risk'].sum(axis=0)/1000000
+
+    NUTS3 = NUTS3[NUTS3.Sum>0]            
+    NUTS3.to_file(os.path.join(data_path,"NUTS3.shp"))
+
+    fig, ax1 = plt.subplots(figsize=(10,20))
+
+    #Let's create a basemap of Europe
+    x1 = -18.
+    x2 = 38.
+    y1 = 33.
+    y2 = 71.
+     
+    m = Basemap(resolution='i',projection='merc', llcrnrlat=y1,urcrnrlat=y2,llcrnrlon=x1,urcrnrlon=x2,lat_ts=(x1+x2)/2)
+    m.drawcountries(linewidth=0.5)
+    m.drawcoastlines(linewidth=0.5)
+                
+    m.drawmapboundary(fill_color='#46bcec')
+    m.fillcontinents(color='white',lake_color='#46bcec')
+    m.drawcoastlines(linewidth=.5)
+    m.readshapefile(os.path.join(data_path,"NUTS3"), 'nuts3')
     
-    world = world.loc[(world.continent == 'Africa') | (world.name.isin(['Russia','Turkey','Ukraine','Belarus','Kosovo','Montenegro',
-                                                               'Bosnia and Herz.','Macedonia','Moldova','Serbia','Libya']))]
-    europe = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
-    europe = europe.loc[(europe['STAT_LEVL_']==2)]
-    europe = europe.to_crs(epsg=4326)
+    cmap = plt.get_cmap('OrRd')   
+    norm = Normalize()
     
-    #plot figure
+    # make a color map of fixed colors
+    bounds=[0.05,1,5,10,50,100,500,1000]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
     
-    # These don't need to constantly be redefined, especially edgecolor
-    facecolor = '#fffff2'
-    edgecolor = 'black'
+    # add values
+    df_poly = pd.DataFrame({
+            'shapes': [Polygon(np.array(shape), True) for shape in m.nuts3],
+            'area': [NUTS_ID['NUTS_ID'] for NUTS_ID in m.nuts3_info],
+            'value_': [Sum['Sum'] for Sum in m.nuts3_info]
+        })
+    pc1 = PatchCollection(df_poly.shapes, edgecolor='k', linewidths=0.1,cmap=cmap, zorder=2)
+    pc1.set_facecolor(cmap(norm(df_poly['value_'].fillna(0).values)))
+    ax1.add_collection(pc1)    
+        
+    # ADD COLORBAR
+    mapper = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
+    mapper.set_array(df_poly['value_'])
+    fig.patch.set_facecolor('white')
     
-    fig, ax = plt.subplots(figsize=(10, 8),
-                           subplot_kw={'projection': ccrs.PlateCarree()})
+    divider = make_axes_locatable(ax1)
+    cax = divider.new_vertical(size="5%", pad=0.2, pack_start=True)
+    fig.add_axes(cax)
+    cbar = fig.colorbar(mapper, cax=cax, orientation="horizontal")
+    cbar.set_label('Risk in million Dollar (2012)', rotation=0,fontsize=14)
     
-    world.plot(ax = ax,color = facecolor,edgecolor=edgecolor,linewidth=0.3)
-    
-    europe.plot(ax= ax, color = facecolor,edgecolor=edgecolor,linewidth=0.3)
-    
-    ax.background_patch.set_facecolor('#f2f9ff')
-    ax.set_extent([-12, 31, 33, 70])
-    
-    #ax.set_title('Commercial sectors impacted on {}'.format(str(date)), fontsize=14,fontweight="bold")
-    
-    
-    #fig.savefig(os.path.join('..','Figures','calc','{}.png'.format(data)),dpi=60)
-    #plt.close(fig)
-    #fig.clear()
+    fig.savefig(figure_output_path,dpi=600,bbox_inches='tight')  
+        

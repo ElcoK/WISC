@@ -15,16 +15,18 @@ import rasterio as rio
 from osgeo import ogr
 import shapely.wkt
 from rasterstats import point_query
-import itertools
+from itertools import product
 
 sys.path.append(os.path.join( '..'))
 from scripts.utils import load_config,get_num,int2date
+
+from sklearn import metrics
 
 def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
     """Get exposure data for single region 
     
     Arguments:
-        region {string} -- NUTS2 code of region to consider.
+        region {string} -- NUTS3 code of region to consider.
         include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})
         event_set {bool} -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})
         save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})
@@ -32,19 +34,20 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     Returns:
         GeoDataFrame with the exposure
     """    
-    
     country = region[:2]
     
     data_path = load_config()['paths']['data']    
    
     osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
     
-    area_poly = os.path.join(data_path,country,'NUTS2_POLY','{}.poly'.format(region))
-    area_pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
+    area_poly = os.path.join(data_path,country,'NUTS3_POLY','{}.poly'.format(region))
+    area_pbf = os.path.join(data_path,country,'NUTS3_OSM','{}.osm.pbf'.format(region))
     
     clip_osm(data_path,osm_path,area_poly,area_pbf)   
     
     gdf_table = fetch_buildings(data_path,country,region,regional=True)
+    
+    print ('Fetched all buildings from osm data for {}'.format(region))
 
     # convert to european coordinate system for overlap
     gdf_table = gdf_table.to_crs(epsg=3035)
@@ -63,34 +66,38 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
 
     # Get land use
     nuts_eu = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
-    nuts_eu.loc[nuts_eu['NUTS_ID']==country].to_file(os.path.join(data_path,
-                                country,'NUTS2_SHAPE','{}.shp'.format(country)))
-    CLC_2012 = os.path.join(data_path,country,'NUTS2_LANDUSE','{}_LANDUSE.tif'.format(country))
-    clip_landuse(data_path,country,CLC_2012)
+
+    nuts_eu.loc[nuts_eu['NUTS_ID']==region].to_file(os.path.join(data_path,
+                                country,'NUTS3_SHAPE','{}.shp'.format(region)))
+
+    CLC_2012 = os.path.join(data_path,country,'NUTS3_LANDUSE','{}_LANDUSE.tif'.format(region))
+    clip_landuse(data_path,country,region,CLC_2012)
 
     gdf_table['CLC_2012'] = point_query(list(gdf_table['centroid']),CLC_2012,nodata=-9999,interpolate='nearest')
 
     if len(sens_analysis_storms) > 0:
         storm_list = load_sens_analysis_storms(sens_analysis_storms)
         for outrast_storm in storm_list:
-            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
+            storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
     elif (include_storms == True) & (event_set == False):
         storm_list = get_storm_list(data_path)
         for outrast_storm in storm_list:
-            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
+            storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
     elif (include_storms == True) & (event_set == True):
         storm_list = get_event_storm_list(data_path)
         for outrast_storm in storm_list:
-            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
+            storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
     if save == True:
         df_exposure = pd.DataFrame(gdf_table)
         df_exposure.to_csv(os.path.join(data_path,'output_exposure',country,'{}_exposure.csv'.format(region)))        
+
+    print ('Obtained all storm information for {}'.format(region))
 
     return gdf_table        
 
@@ -99,7 +106,7 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
     
     Arguments:
         storm {string} -- date of the storm
-        region {string} -- NUTS2 code of region to consider
+        region {string} -- NUTS3 code of region to consider
         output_table -- GeoDataFrame with all buildings and the wind speed values for each storm
         max_dam {numpy array} -- table with maximum damages per building type/land-use class
         curves  {dataframe} -- fragility curves for the different building types
@@ -115,11 +122,10 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
     df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
     df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
 
-    storm = str(storm)
 
-    df_C2[storm+'_curve'] = df_C2[storm].map(curves['C2']) 
-    df_C3[storm+'_curve'] = df_C3[storm].map(curves['C3'])
-    df_C4[storm+'_curve'] = df_C4[storm].map(curves['C4']) 
+    df_C2[str(storm)+'_curve'] = df_C2[storm].map(curves['C2']) 
+    df_C3[str(storm)+'_curve'] = df_C3[storm].map(curves['C3'])
+    df_C4[str(storm)+'_curve'] = df_C4[storm].map(curves['C4']) 
  
     #specify shares for urban and nonurban        
     RES_URB = sample[4]/100 
@@ -129,14 +135,14 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
     IND_NONURB = 0.5
 
     # Use pandas where to fill new column for losses
-    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(0,12, inclusive=True), (df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[0]/100), 0)
-    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(13,23, inclusive=True), (df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C2['AREA_m2']*df_C2[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[0]/100),df_C2['Loss'])
+    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(0,12, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[0]/100), 0)
+    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(13,23, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[0]/100),df_C2['Loss'])
 
-    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(0,12, inclusive=True), (df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[1]/100), 0)
-    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(13,23, inclusive=True), (df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C3['AREA_m2']*df_C3[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[1]/100),df_C3['Loss'])
+    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(0,12, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[1]/100), 0)
+    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(13,23, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[1]/100),df_C3['Loss'])
 
-    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
-    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[storm+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
+    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
+    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
 
 #        # and write output 
     return  (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))        
@@ -163,10 +169,10 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
     #load storms
     if storm_event_set == False:
         storm_list = get_storm_list(data_path)
-        storm_name_list = [int2date(get_num(x[-23:].split('_')[0][:-2])) for x in storm_list]
+        storm_name_list = [str(int2date(get_num(x[-23:].split('_')[0][:-2]))) for x in storm_list]
     else:
         storm_list = get_event_storm_list(data_path)
-        storm_name_list = [int2date(get_num(x[-23:].split('_')[0][:-2])) for x in storm_list]
+        storm_name_list = [str(int2date(get_num(x[-23:].split('_')[0][:-2]))) for x in storm_list]
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -183,12 +189,36 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
     for storm in storm_name_list:
         write_output[storm] = loss_calculation(storm,country,output_table,max_dam,curves,sample)
     
+    df_losses = pd.DataFrame(write_output)
+
     ## save this regional file
     if storm_event_set == False:
-        df_losses = pd.DataFrame(write_output)
         df_losses.to_csv(os.path.join(data_path,'output_losses',country,'{}_losses.csv'.format(region)))
+ 
+        print ('Finished with loss calculation for {}'.format(region))
     
-    return(gpd.GeoDataFrame(write_output))
+        return(gpd.GeoDataFrame(write_output))
+        
+    else:
+        #Numpify data
+        pdZ = np.array(df_losses[storm_name_list],dtype=int)
+        write_output.drop(storm_name_list, axis=1, inplace=True)
+       
+        output_ =[]
+        
+        for row in pdZ:
+            H,X1 = np.histogram(row, bins = 100, normed = True )
+            dx = X1[1] - X1[0]
+            F1 = np.cumsum(np.append(0,H))*dx
+            output_.append(metrics.auc(X1, F1))
+        
+        df_losses['Risk'] = output_
+        
+        df_losses.to_csv(os.path.join(data_path,'output_risk',country,'{}_risk.csv'.format(region)))
+
+        print ('Finished with risk calculation for {}'.format(region))
+        
+        return(gpd.GeoDataFrame(write_output))
     
 
 def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
@@ -221,7 +251,7 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
 
-    all_combis = list(itertools.product(samples,storm_name_list))
+    all_combis = list(product(samples,storm_name_list))
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -264,7 +294,7 @@ def get_storm_data(storm_path):
         affine_storm = src.affine
     return array,affine_storm
 
-def extract_buildings(area,country,nuts2=True):
+def extract_buildings(area,country,NUTS3=True):
     """Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile
     
     Arguments:
@@ -272,15 +302,15 @@ def extract_buildings(area,country,nuts2=True):
         country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
-        nuts2 {bool} -- [description] (default: {True})
+        NUTS3 {bool} -- [description] (default: {True})
     
     """
     # get data path
     data_path = load_config()['paths']['data']
 
-    wgs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings.shp'.format(area))
-    if nuts2 == True:
-        pbf = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(area))
+    wgs = os.path.join(data_path,country,'NUTS3_BUILDINGS','{}_buildings.shp'.format(area))
+    if NUTS3 == True:
+        pbf = os.path.join(data_path,country,'NUTS3_OSM','{}.osm.pbf'.format(area))
     else:
         pbf = os.path.join(data_path,'OSM','{}.osm.pbf'.format(area))
   
@@ -292,7 +322,7 @@ def convert_buildings(area,country):
     """Converts the coordinate system from EPSG:4326 to EPSG:3035.
 
     Arguments:
-        area {string} -- name of area (most often NUTS2) for which buildings should be converted to European coordinate system 
+        area {string} -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system 
 
         country {string} -- ISO2 code of country to consider.
 
@@ -303,7 +333,7 @@ def convert_buildings(area,country):
     data_path = load_config()['paths']['data']
 
     # path to area with buildings
-    etrs = os.path.join(data_path,country,'NUTS2_BUILDINGS','{}_buildings.shp'.format(area))
+    etrs = os.path.join(data_path,country,'NUTS3_BUILDINGS','{}_buildings.shp'.format(area))
 
     # load data 
     input_ = gpd.read_file(etrs)
@@ -406,7 +436,7 @@ def load_osm_data(data_path,country,region='',regional=False):
     Arguments:
         data_path
         country {string} -- ISO2 code of country to consider.
-        region {string} -- NUTS2 code of region to consider.
+        region {string} -- NUTS3 code of region to consider.
         regional {boolean} -- set to False by default
 
     Returns:
@@ -417,7 +447,7 @@ def load_osm_data(data_path,country,region='',regional=False):
     if regional==False:
         osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
     else:
-        osm_path = os.path.join(data_path,country,'NUTS2_OSM','{}.osm.pbf'.format(region))
+        osm_path = os.path.join(data_path,country,'NUTS3_OSM','{}.osm.pbf'.format(region))
         
 
     driver=ogr.GetDriverByName('OSM')
@@ -430,7 +460,7 @@ def fetch_buildings(data_path,country,region='',regional=False):
     Arguments:
         data_path
         country {string} -- ISO2 code of country to consider.
-        region {string} -- NUTS2 code of region to consider.
+        region {string} -- NUTS3 code of region to consider.
         regional {boolean} -- set to False by default
      
     Returns:
@@ -471,13 +501,13 @@ def poly_files(data_path,country):
         country: string name of country ISO2.
    
     Returns:
-        .poly file for each nuts2 in a new dir in the working directory.
+        .poly file for each NUTS3 in a new dir in the working directory.
     """     
    
 # =============================================================================
 #     """ Create output dir for .poly files if it is doesnt exist yet"""
 # =============================================================================
-    poly_dir = os.path.join(data_path,country,'NUTS2_POLY')
+    poly_dir = os.path.join(data_path,country,'NUTS3_POLY')
         
     if not os.path.exists(poly_dir):
         os.makedirs(poly_dir)
@@ -488,7 +518,7 @@ def poly_files(data_path,country):
     wb_poly = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
     
     # filter polygon file
-    country_poly = wb_poly.loc[(wb_poly['NUTS_ID'].apply(lambda x: x.startswith(country))) & (wb_poly['STAT_LEVL_']==2)]
+    country_poly = wb_poly.loc[(wb_poly['NUTS_ID'].apply(lambda x: x.startswith(country))) & (wb_poly['STAT_LEVL_']==3)]
 
     country_poly.crs = {'init' :'epsg:3035'}
 
@@ -543,7 +573,7 @@ def poly_files(data_path,country):
         f.write("END" +"\n")
         f.close()
 
-def clip_landuse(data_path,country,outrast_lu):
+def clip_landuse(data_path,country,region,outrast_lu):
     """Clip the landuse from the European Corine Land Cover (CLC) map to the considered country
     
     Arguments:
@@ -554,7 +584,7 @@ def clip_landuse(data_path,country,outrast_lu):
     
     inraster = os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')
     
-    inshape = os.path.join(data_path,country,'NUTS2_SHAPE','{}.shp'.format(country))
+    inshape = os.path.join(data_path,country,'NUTS3_SHAPE','{}.shp'.format(region))
    
     subprocess.call(["gdalwarp","-q","-overwrite","-srcnodata","-9999","-co","compress=lzw","-tr","100","-100","-r","near",inraster, outrast_lu, "-cutline", inshape,"-crop_to_cutline"])
  
@@ -577,13 +607,11 @@ def clip_osm(data_path,osm_path,area_poly,area_pbf):
     Returns:
         a clipped .osm.pbf file.
     """ 
-    print('{} started!'.format(area_pbf))
 
     osm_convert_path = os.path.join(data_path,'osmconvert','osmconvert64')
     try: 
         if (os.path.exists(area_pbf) is not True):
             os.system('{}  {} -B={} --complete-ways -o={}'.format(osm_convert_path,osm_path,area_poly,area_pbf))
-        print('{} finished!'.format(area_pbf))
 
     except:
         print('{} did not finish!'.format(area_pbf))
@@ -604,7 +632,7 @@ def load_sens_analysis_storms(storm_name_list=['19991203','19900125','20090124',
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
                     
-def summary_statistics():
+def summary_statistics_losses():
     """
     This function creates the file 'output_storms.xlsx'. This file is required to create the summary figures.
     """

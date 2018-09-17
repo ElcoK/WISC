@@ -12,7 +12,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import pandas as pd
-import matplotlib
+#import matplotlib
 import numpy as np
 from multiprocessing import Pool,cpu_count
 
@@ -23,14 +23,13 @@ from scripts.utils import load_config,download_osm_file
 import country_converter as coco
 cc = coco.CountryConverter()
 
-matplotlib.style.use('ggplot')
+#matplotlib.style.use('ggplot')
 
-matplotlib.rcParams['font.size'] = 14.
-matplotlib.rcParams['font.family'] = 'tahoma'
-matplotlib.rcParams['axes.labelsize'] = 14.
-matplotlib.rcParams['xtick.labelsize'] = 12.
-matplotlib.rcParams['ytick.labelsize'] = 12.
-
+#matplotlib.rcParams['font.size'] = 14.
+#matplotlib.rcParams['font.family'] = 'tahoma'
+#matplotlib.rcParams['axes.labelsize'] = 14.
+#matplotlib.rcParams['xtick.labelsize'] = 12.
+#matplotlib.rcParams['ytick.labelsize'] = 12.
 
 def calculate(country,parallel=True,save=True):
 

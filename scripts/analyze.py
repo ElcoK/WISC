@@ -13,7 +13,6 @@ import pandas as pd
 sys.path.append(os.path.join( '..'))
 from scripts.functions import region_exposure,region_losses,poly_files,load_sample
 from scripts.utils import load_config,download_osm_file
-from sklearn import metrics
 
 import country_converter as coco
 cc = coco.CountryConverter()
@@ -42,7 +41,7 @@ def all_countries_exposure():
        exposure(country, include_storms = True, parallel = False) 
 
 def exposure(country, include_storms = True, parallel = True,save=True):
-    """"
+    """
     Creation of exposure table of the specified country
     
     Arguments:
@@ -70,7 +69,7 @@ def exposure(country, include_storms = True, parallel = True,save=True):
     download_osm_file(country)
     
     #get list of regions for which we have poly files (should be all) 
-    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
+    regions = os.listdir(os.path.join(data_path,country,'NUTS3_POLY'))
     regions = [x.split('.')[0] for x in regions]
     
     if include_storms == True:
@@ -105,7 +104,7 @@ def exposure(country, include_storms = True, parallel = True,save=True):
     return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')
    
 def losses(country, parallel = True, event_set = False,save=True):
-    """"
+    """
     Creation of exposure table of the specified country
     
     Arguments:
@@ -136,7 +135,7 @@ def losses(country, parallel = True, event_set = False,save=True):
     sample = load_sample(country)
     
     #get list of regions for which we have poly files (should be all) 
-    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
+    regions = os.listdir(os.path.join(data_path,country,'NUTS3_POLY'))
     regions = [x.split('.')[0] for x in regions]
     
     if event_set == False:
@@ -163,42 +162,28 @@ def losses(country, parallel = True, event_set = False,save=True):
             for region in regions:
                 country_table.append(region_losses(region,True))
 
-    if save == True:
+    if (save == True) & (event_set == False):
         gdf_table  = gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326',geometry='geometry')
         gdf_table.drop(['centroid'],axis='columns',inplace=True)
         gdf_table.to_file(os.path.join(data_path,'losses_country','{}_losses.shp'.format(country)))
+    else:
+        None
     
     return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')    
 
-def risk(country,path_to_eventset,save=True):
+def risk(country,path_to_eventset,save=True,parallel=True):
     """
     Estimate risk based on event set
+
     Arguments:
         country {string} -- country to consider.
         path_to_eventset {string} -- the location of the event set in the data directory
-                
     
     """
     # get data path
     data_path = load_config()['paths']['data']
     
-    gdf_buildings = losses(country, event_set = True)
-    
-    storm_name_list = [os.path.join(data_path,path_to_eventset,x) for x in os.listdir(os.path.join(data_path,path_to_eventset))]
-
-    #Numpify data
-    pdZ = np.array(gdf_buildings[storm_name_list],dtype=int)
-    gdf_buildings.drop(storm_name_list, axis=1, inplace=True)
-   
-    output_ =[]
-    
-    for row in pdZ:
-        H,X1 = np.histogram(row, bins = 100, normed = True )
-        dx = X1[1] - X1[0]
-        F1 = np.cumsum(np.append(0,H))*dx
-        output_.append(metrics.auc(X1, F1))
-    
-    gdf_buildings['Risk'] = output_
+    gdf_buildings = losses(country, parallel = parallel, event_set = True, save=True)
     
     if save == True:
         gdf_buildings.drop(['centroid'],axis='columns',inplace=True)
