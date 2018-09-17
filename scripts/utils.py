@@ -72,6 +72,19 @@ def create_folder_structure(data_path,country):
     if not os.path.exists(os.path.join(data_path,country,'NUTS2_BUILDINGS')):        
         os.makedirs(os.path.join(data_path,country,'NUTS2_BUILDINGS')) 
 
+    if not os.path.exists(os.path.join(data_path,'exposure_country')):        
+        os.makedirs(os.path.join(data_path,'exposure_country'))        
+    if not os.path.exists(os.path.join(data_path,'losses_country')):        
+        os.makedirs(os.path.join(data_path,'losses_country')) 
+    if not os.path.exists(os.path.join(data_path,'output_exposure')):        
+        os.makedirs(os.path.join(data_path,'output_exposure'))        
+    if not os.path.exists(os.path.join(data_path,'output_losses')):        
+        os.makedirs(os.path.join(data_path,'output_losses')) 
+    if not os.path.exists(os.path.join(data_path,'output_exposure',country)):        
+        os.makedirs(os.path.join(data_path,'output_exposure',country)) 
+    if not os.path.exists(os.path.join(data_path,'output_losses',country)):        
+        os.makedirs(os.path.join(data_path,'output_losses',country)) 
+
 
 def int2date(argdate: int):
     """
@@ -88,7 +101,6 @@ def int2date(argdate: int):
     day = int(argdate % 100)
 
     return date(year, month, day)
-
 
 def get_num(x):
     """[summary]

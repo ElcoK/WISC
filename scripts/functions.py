@@ -18,16 +18,19 @@ from rasterstats import point_query
 import itertools
 
 sys.path.append(os.path.join( '..'))
-from scripts.utils import load_config,get_num
+from scripts.utils import load_config,get_num,int2date
 
-def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[]):
+def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
     """Get exposure data for single region 
     
     Arguments:
-       region {string} -- NUTS2 code of region to consider.
+        region {string} -- NUTS2 code of region to consider.
+        include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})
+        event_set {bool} -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})
+        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})
    
     Returns:
-        GeoDataFrame -- [description]
+        GeoDataFrame with the exposure
     """    
     
     country = region[:2]
@@ -41,7 +44,7 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     
     clip_osm(data_path,osm_path,area_poly,area_pbf)   
     
-    gdf_table = fetch_roads(data_path,country,region,regional=True)
+    gdf_table = fetch_buildings(data_path,country,region,regional=True)
 
     # convert to european coordinate system for overlap
     gdf_table = gdf_table.to_crs(epsg=3035)
@@ -70,30 +73,49 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     if len(sens_analysis_storms) > 0:
         storm_list = load_sens_analysis_storms(sens_analysis_storms)
         for outrast_storm in storm_list:
-            storm_name = str(get_num(outrast_storm[-23:]))
+            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
     elif (include_storms == True) & (event_set == False):
         storm_list = get_storm_list(data_path)
         for outrast_storm in storm_list:
-            storm_name = str(get_num(outrast_storm[-23:]))
+            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
 
     elif (include_storms == True) & (event_set == True):
         storm_list = get_event_storm_list(data_path)
         for outrast_storm in storm_list:
-            storm_name = str(get_num(outrast_storm[-23:]))
+            storm_name = int2date(get_num(outrast_storm[-23:].split('_')[0][:-2]))
             gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+
+    if save == True:
+        df_exposure = pd.DataFrame(gdf_table)
+        df_exposure.to_csv(os.path.join(data_path,'output_exposure',country,'{}_exposure.csv'.format(region)))        
 
     return gdf_table        
 
 def loss_calculation(storm,country,output_table,max_dam,curves,sample):
+    """Calculate the losses per storm
+    
+    Arguments:
+        storm {string} -- date of the storm
+        region {string} -- NUTS2 code of region to consider
+        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm
+        max_dam {numpy array} -- table with maximum damages per building type/land-use class
+        curves  {dataframe} -- fragility curves for the different building types
+        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation
+   
+    Returns:
+        GeoDataFrame including the losses for the storm
+    """   
     
     max_dam_country = np.asarray(max_dam[max_dam['CODE'].str.contains(country)].iloc[:,1:],dtype='int16')    
 
     df_C2 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
     df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
     df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+
+    storm = str(storm)
 
     df_C2[storm+'_curve'] = df_C2[storm].map(curves['C2']) 
     df_C3[storm+'_curve'] = df_C3[storm].map(curves['C3'])
@@ -134,7 +156,6 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
         dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm
 
     """ 
-    
     data_path = load_config()['paths']['data']    
     
     country = region[:2]
@@ -142,10 +163,10 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
     #load storms
     if storm_event_set == False:
         storm_list = get_storm_list(data_path)
-        storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
+        storm_name_list = [int2date(get_num(x[-23:].split('_')[0][:-2])) for x in storm_list]
     else:
         storm_list = get_event_storm_list(data_path)
-        storm_name_list = [str(get_num(x[-23:])) for x in storm_list]
+        storm_name_list = [int2date(get_num(x[-23:].split('_')[0][:-2])) for x in storm_list]
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -158,13 +179,17 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
     no_storm_columns = list(set(output_table.columns).difference(list(storm_name_list)))
     write_output = pd.DataFrame(output_table[no_storm_columns])
 
+    ## Calculate losses for buildings in this NUTS region
     for storm in storm_name_list:
         write_output[storm] = loss_calculation(storm,country,output_table,max_dam,curves,sample)
     
-    ##==============================================================================
-    ## Calculate losses for buildings in this NUTS region
-    ##==============================================================================
+    ## save this regional file
+    if storm_event_set == False:
+        df_losses = pd.DataFrame(write_output)
+        df_losses.to_csv(os.path.join(data_path,'output_losses',country,'{}_losses.csv'.format(region)))
+    
     return(gpd.GeoDataFrame(write_output))
+    
 
 def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
@@ -217,7 +242,6 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     
     return(output_file)
 
-
 def storm_exposure(gdf_table):
     
     data_path = load_config()['paths']['data']    
@@ -241,7 +265,7 @@ def get_storm_data(storm_path):
     return array,affine_storm
 
 def extract_buildings(area,country,nuts2=True):
-    """[summary]
+    """Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile
     
     Arguments:
         area {[type]} -- [description]
@@ -377,6 +401,19 @@ def load_sample(country):
     return dict_[country]
 
 def load_osm_data(data_path,country,region='',regional=False):
+    """This function loads the OSM file for the country
+    
+    Arguments:
+        data_path
+        country {string} -- ISO2 code of country to consider.
+        region {string} -- NUTS2 code of region to consider.
+        regional {boolean} -- set to False by default
+
+    Returns:
+        opened OSM file to use in the fetch_roads function
+    
+    """
+    
     if regional==False:
         osm_path = os.path.join(data_path,'OSM','{}.osm.pbf'.format(country))
     else:
@@ -386,9 +423,19 @@ def load_osm_data(data_path,country,region='',regional=False):
     driver=ogr.GetDriverByName('OSM')
     return driver.Open(osm_path)
 
-def fetch_roads(data_path,country,region='',regional=False):
+def fetch_buildings(data_path,country,region='',regional=False):
     """
     This function directly reads the building data from osm, instead of first converting it to a shapefile
+    
+    Arguments:
+        data_path
+        country {string} -- ISO2 code of country to consider.
+        region {string} -- NUTS2 code of region to consider.
+        regional {boolean} -- set to False by default
+     
+    Returns:
+        geodataframe with all buildings
+     
     """
     data = load_osm_data(data_path,country,region='',regional=False)
     
@@ -541,13 +588,14 @@ def clip_osm(data_path,osm_path,area_poly,area_pbf):
     except:
         print('{} did not finish!'.format(area_pbf))
         
-def load_sens_analysis_storms(sens_analysis_storms=[]):
-        # select storms to assess
-
+def load_sens_analysis_storms(storm_name_list=['19991203','19900125','20090124','20070118','19991226']):
+    """
+    This file load the storms used to perform the sensitivity analysis. 
+    
+    Arguments:
+        sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar 
+    """
     data_path = load_config()['paths']['data']
-
-    if len(sens_analysis_storms) == 0:
-        storm_name_list = ['19991203','19900125','20090124','20070118','19991226']
 
     storm_list = []
     for root, dirs, files in os.walk(os.path.join(data_path,'STORMS')):
@@ -557,12 +605,17 @@ def load_sens_analysis_storms(sens_analysis_storms=[]):
                     storm_list.append(os.path.join(data_path,'STORMS',file))
                     
 def summary_statistics():
+    """
+    This function creates the file 'output_storms.xlsx'. This file is required to create the summary figures.
+    """
+    
+    data_path = load_config()['paths']['data']
     
     countries = ['AT','BE','DK','FR','DE','IE','LU','NL','NO','SE','UK','PL','IT','FI'] 
 
-    first_line = pd.read_csv(curdir+'//LU//LU000_tier2.csv', nrows=1)
+    first_line = pd.read_csv(os.path.join(data_path,'output_losses','LU','LU00_losses.csv'), nrows=1)
     extract = first_line.columns.tolist()[2:]
-    storm_name_list = extract[6:]
+    storm_name_list = extract[8:]
     
     output_storms = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
     output_storms_res = pd.DataFrame(np.zeros((len(storm_name_list),len(countries))),index=storm_name_list,columns=countries)
@@ -574,9 +627,9 @@ def summary_statistics():
 
     for country in countries:
        output_table = pd.DataFrame()
-       for root, dirs, files in os.walk(curdir+'//%s//' % country):
+       for root, dirs, files in os.walk(os.path.join(data_path,'output_losses',country)):
            for file in files:
-                output_table = pd.read_csv(curdir+'//%s//' % country +file, usecols=extract)
+                output_table = pd.read_csv(os.path.join(data_path,'output_losses',country,file), usecols=extract)
                 output_table = output_table.replace([np.inf, -np.inf], np.nan).dropna(how='all')
                 output_table = output_table.reset_index(inplace=False)
                 # TOTAL
@@ -596,7 +649,6 @@ def summary_statistics():
                 # AGRICULTURAL BUILDINGS
                 agri = output_table[output_table.CLC_2012 > 12]
                 output_storms_agri[country] += (agri[storm_name_list].sum(axis=0)/1000000)
-#                
     
     output_storms['Sum'] = output_storms.sum(axis=1)
     output_storms_res['Sum'] = output_storms_res.sum(axis=1)
@@ -605,11 +657,11 @@ def summary_statistics():
     output_storms_other['Sum'] = output_storms_other.sum(axis=1)
     output_storms_agri['Sum'] = output_storms_agri.sum(axis=1)
 
-    out = pd.ExcelWriter('output_storms.xlsx')
-    output_storms.to_excel(out,sheet_name='total_losses')
-    output_storms_res.to_excel(out,sheet_name='res_losses')
-    output_storms_ind_com.to_excel(out,sheet_name='ind_com_losses')
-    output_storms_transport.to_excel(out,sheet_name='transport_losses')
-    output_storms_other.to_excel(out,sheet_name='other_losses')
-    output_storms_agri.to_excel(out,sheet_name='agri_losses')
+    out = pd.ExcelWriter(os.path.join(data_path,'output_storms.xlsx'))
+    output_storms.to_excel(out,sheet_name='total_losses',index_label='Storm')
+    output_storms_res.to_excel(out,sheet_name='res_losses',index_label='Storm')
+    output_storms_ind_com.to_excel(out,sheet_name='ind_com_losses',index_label='Storm')
+    output_storms_transport.to_excel(out,sheet_name='transport_losses',index_label='Storm')
+    output_storms_other.to_excel(out,sheet_name='other_losses',index_label='Storm')
+    output_storms_agri.to_excel(out,sheet_name='agri_losses',index_label='Storm')
     out.save()
