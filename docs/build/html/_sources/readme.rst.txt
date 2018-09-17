@@ -18,7 +18,8 @@ In case of no access to the GitHub page, the other option would be to copy-paste
    .. code::
 
 		name: WISC
-		   dependencies:
+		
+		dependencies:
 			- python=3.6
 			- gdal
 			- numpy
@@ -27,4 +28,10 @@ In case of no access to the GitHub page, the other option would be to copy-paste
 			- pathos
 			- rasterio
 			- rasterstats
+			- matplotlib
+			- basemap
+			- SAlib
+			- urllib3
+			- scikit-learn
+			- xlrd
 	

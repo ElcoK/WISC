@@ -16,5 +16,7 @@ Note that the explanation of the functions in this reference guide is mainly foc
  
    readme
    utils
-   prepare
+   functions
    analyze
+   sensitivity
+   plotting

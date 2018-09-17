@@ -32,7 +32,8 @@ cc = coco.CountryConverter()
 #matplotlib.rcParams['ytick.labelsize'] = 12.
 
 def calculate(country,parallel=True,save=True):
-
+    """ Base function to perform the sensitivity analysis for a country
+    """
     # set data path    
     data_path = load_config()['paths']['data']
     
@@ -69,7 +70,8 @@ def calculate(country,parallel=True,save=True):
     return country_table            
                 
 def prepare_sens_analysis(storm_name_list=[]):
-    
+    """ Function to prepare the sensitivity analysis for a country
+    """    
     data_path = load_config()['paths']['data']
     
     # set parameters for sensitivity analysis
@@ -106,7 +108,8 @@ def prepare_sens_analysis(storm_name_list=[]):
 
 
 def read_outcomes_sens_analysis():
-    
+    """ Function to write the output of the sensitivity analysis to figures
+    """      
     # load some basics
     data_path = load_config()['paths']['data']
     

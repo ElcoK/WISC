@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scripts.sensitivity &mdash; WISC 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="WISC 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> WISC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyze.html">Analyze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sensitivity.html">Sensitivity Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">WISC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>scripts.sensitivity</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scripts.sensitivity</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue Jul 24 14:18:26 2018</span>
+
+<span class="sd">@author: cenv0574</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">SALib.sample</span> <span class="k">import</span> <span class="n">latin</span>
+<span class="kn">from</span> <span class="nn">SALib.analyze</span> <span class="k">import</span> <span class="n">delta</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1">#import matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span><span class="n">cpu_count</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="s1">&#39;..&#39;</span><span class="p">))</span>
+<span class="kn">from</span> <span class="nn">scripts.functions</span> <span class="k">import</span> <span class="n">region_sens_analysis</span><span class="p">,</span><span class="n">poly_files</span>
+<span class="kn">from</span> <span class="nn">scripts.utils</span> <span class="k">import</span> <span class="n">load_config</span><span class="p">,</span><span class="n">download_osm_file</span>
+
+<span class="kn">import</span> <span class="nn">country_converter</span> <span class="k">as</span> <span class="nn">coco</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">coco</span><span class="o">.</span><span class="n">CountryConverter</span><span class="p">()</span>
+
+<span class="c1">#matplotlib.style.use(&#39;ggplot&#39;)</span>
+
+<span class="c1">#matplotlib.rcParams[&#39;font.size&#39;] = 14.</span>
+<span class="c1">#matplotlib.rcParams[&#39;font.family&#39;] = &#39;tahoma&#39;</span>
+<span class="c1">#matplotlib.rcParams[&#39;axes.labelsize&#39;] = 14.</span>
+<span class="c1">#matplotlib.rcParams[&#39;xtick.labelsize&#39;] = 12.</span>
+<span class="c1">#matplotlib.rcParams[&#39;ytick.labelsize&#39;] = 12.</span>
+
+<div class="viewcode-block" id="calculate"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.calculate">[docs]</a><span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="n">country</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base function to perform the sensitivity analysis for a country</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># set data path    </span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    
+    <span class="c1">#make sure the country inserted is an ISO2 country name for he remainder of the analysis</span>
+    <span class="n">country</span> <span class="o">=</span> <span class="n">coco</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">country</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="s1">&#39;ISO2&#39;</span><span class="p">)</span>
+
+    <span class="c1"># get data path</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="c1"># create country poly files</span>
+    <span class="n">poly_files</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">)</span>
+    
+    <span class="c1">#download OSM file if it is not there yet:</span>
+    <span class="n">download_osm_file</span><span class="p">(</span><span class="n">country</span><span class="p">)</span>
+
+    <span class="n">samples</span><span class="p">,</span><span class="n">storm_list</span> <span class="o">=</span> <span class="n">prepare_sens_analysis</span><span class="p">()</span>
+
+    <span class="c1">#get list of regions for which we have poly files (should be all) </span>
+    <span class="n">regions</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS2_POLY&#39;</span><span class="p">))</span>
+    <span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">parallel</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+        <span class="n">storms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="n">storm_list</span><span class="p">]</span>
+        <span class="n">save</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="n">save</span><span class="p">]</span>
+        
+        <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">cpu_count</span><span class="p">()</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span> 
+            <span class="n">country_table</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">region_sens_analysis</span><span class="p">,</span><span class="nb">zip</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span><span class="n">samples</span><span class="p">,</span><span class="n">storms</span><span class="p">,</span><span class="n">save</span><span class="p">),</span><span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">country_table</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">:</span>
+            <span class="n">country_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region_sens_analysis</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">samples</span><span class="p">,</span><span class="n">storms</span><span class="p">,</span><span class="n">save</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">country_table</span>            </div>
+                
+<div class="viewcode-block" id="prepare_sens_analysis"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.prepare_sens_analysis">[docs]</a><span class="k">def</span> <span class="nf">prepare_sens_analysis</span><span class="p">(</span><span class="n">storm_name_list</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot; Function to prepare the sensitivity analysis for a country</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># set parameters for sensitivity analysis</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;num_vars&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">,</span> <span class="s1">&#39;c3&#39;</span><span class="p">,</span> <span class="s1">&#39;c4&#39;</span><span class="p">,</span><span class="s1">&#39;lu1&#39;</span><span class="p">,</span><span class="s1">&#39;lu2&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">]]}</span>
+
+    <span class="n">param_values</span> <span class="o">=</span> <span class="n">latin</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span><span class="mi">5000</span><span class="p">)</span>
+
+    <span class="c1"># rescale parameters for vulnerability curves (should add up to 100)    </span>
+    <span class="n">rescale</span> <span class="o">=</span> <span class="n">param_values</span><span class="p">[:,:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rescale</span><span class="p">)):</span>
+        <span class="n">inb</span> <span class="o">=</span> <span class="p">(</span><span class="n">rescale</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">rescale</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">param_values</span><span class="p">[</span><span class="n">i</span><span class="p">,:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">inb</span>
+    
+   
+    <span class="c1"># select storms to assess</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]</span>
+
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+                    
+    <span class="k">return</span> <span class="n">param_values</span><span class="p">,</span><span class="n">storm_name_list</span></div>
+
+
+<div class="viewcode-block" id="read_outcomes_sens_analysis"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.read_outcomes_sens_analysis">[docs]</a><span class="k">def</span> <span class="nf">read_outcomes_sens_analysis</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Function to write the output of the sensitivity analysis to figures</span>
+<span class="sd">    &quot;&quot;&quot;</span>      
+    <span class="c1"># load some basics</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># specify country</span>
+    <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;CZ&#39;</span><span class="p">,</span><span class="s1">&#39;CH&#39;</span><span class="p">,</span><span class="s1">&#39;EE&#39;</span><span class="p">,</span><span class="s1">&#39;LV&#39;</span><span class="p">,</span><span class="s1">&#39;LT&#39;</span><span class="p">,</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">]</span>
+
+       <span class="c1"># done: LU </span>
+    <span class="n">country_full_names</span> <span class="o">=</span>    <span class="p">{</span>
+    <span class="s1">&#39;CZ&#39;</span><span class="p">:</span> <span class="s1">&#39;Czech Republic&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;CH&#39;</span><span class="p">:</span> <span class="s1">&#39;Switzerland&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;EE&#39;</span><span class="p">:</span> <span class="s1">&#39;Estonia&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;LV&#39;</span><span class="p">:</span> <span class="s1">&#39;Latvia&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;LT&#39;</span><span class="p">:</span> <span class="s1">&#39;Lithuania&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;PT&#39;</span><span class="p">:</span> <span class="s1">&#39;Portugal&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;ES&#39;</span><span class="p">:</span> <span class="s1">&#39;Spain&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;AT&#39;</span><span class="p">:</span> <span class="s1">&#39;Austria&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;BE&#39;</span><span class="p">:</span> <span class="s1">&#39;Belgium&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;DK&#39;</span><span class="p">:</span> <span class="s1">&#39;Denmark&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;LU&#39;</span><span class="p">:</span> <span class="s1">&#39;Luxembourg&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;NL&#39;</span><span class="p">:</span> <span class="s1">&#39;Netherlands&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;IE&#39;</span><span class="p">:</span> <span class="s1">&#39;Ireland&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;UK&#39;</span><span class="p">:</span> <span class="s1">&#39;United Kingdom&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="s1">&#39;Norway&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="s1">&#39;Sweden&#39;</span><span class="p">}</span>
+
+    <span class="n">storms</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="s1">&#39;19991203&#39;</span><span class="p">:</span><span class="s1">&#39;Anatol&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;19900125&#39;</span><span class="p">:</span><span class="s1">&#39;Daria&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;20090124&#39;</span><span class="p">:</span><span class="s1">&#39;Klaus&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;20070118&#39;</span><span class="p">:</span><span class="s1">&#39;Kyrill&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;19991226&#39;</span><span class="p">:</span><span class="s1">&#39;Lothar&#39;</span>
+              <span class="p">}</span>
+       
+    <span class="c1"># set parameters for sensitivity analysis</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;num_vars&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">,</span> <span class="s1">&#39;c3&#39;</span><span class="p">,</span> <span class="s1">&#39;c4&#39;</span><span class="p">,</span><span class="s1">&#39;lu1&#39;</span><span class="p">,</span><span class="s1">&#39;lu2&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">]]}</span>
+
+
+    <span class="c1"># select storms to assess</span>
+    <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]</span>
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">country</span> <span class="ow">in</span> <span class="n">countries</span><span class="p">:</span>
+        <span class="n">dirlist</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">))</span>
+        <span class="n">country_list</span>  <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dirlist</span> <span class="k">if</span> <span class="n">country</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">country_list</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="n">country_list</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>   
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out2</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="n">country_list</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    
+                <span class="n">out</span> <span class="o">+=</span> <span class="n">out2</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">2</span>  
+        <span class="n">param_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="n">country_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        
+        <span class="c1">#Estimate outcome of sensitvity analysis    </span>
+        <span class="n">param_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">param_values</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">storm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span><span class="n">l</span><span class="p">])</span>
+                <span class="n">Si</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">param_values</span><span class="p">,</span> <span class="n">storm</span> <span class="p">,</span> <span class="n">print_to_console</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+                <span class="c1"># create histogram                </span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">storm</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>   
+                <span class="n">plt</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="n">tight</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">country_full_names</span><span class="p">[</span><span class="n">country</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">+</span><span class="n">storms</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Frequency&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Total damage in Million Euro&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;Figures&#39;</span><span class="p">,</span><span class="n">country</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">storms</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;.png&#39;</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                
+                <span class="c1"># create pie chart</span>
+                <span class="n">delta_</span> <span class="o">=</span> <span class="p">(</span><span class="n">Si</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">])</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">Si</span><span class="p">[</span><span class="s1">&#39;delta&#39;</span><span class="p">])</span><span class="o">*</span><span class="mi">100</span>
+                <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;yellowgreen&#39;</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;lightskyblue&#39;</span><span class="p">,</span> <span class="s1">&#39;lightcoral&#39;</span><span class="p">,</span><span class="s1">&#39;peru&#39;</span><span class="p">]</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">,</span> <span class="s1">&#39;c3&#39;</span><span class="p">,</span> <span class="s1">&#39;c4&#39;</span><span class="p">,</span><span class="s1">&#39;lu1&#39;</span><span class="p">,</span><span class="s1">&#39;lu2&#39;</span><span class="p">]</span>
+                <span class="n">patches</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="n">delta_</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">startangle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                                         <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> : </span><span class="si">%1.1f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">delta_</span><span class="p">)])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">country_full_names</span><span class="p">[</span><span class="n">country</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">+</span><span class="n">storms</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;Figures&#39;</span><span class="p">,</span><span class="n">country</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">storms</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">ix</span><span class="p">[:,</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_SA.png&#39;</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ev</span><span class="p">:</span> <span class="k">continue</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Elco Koks.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -36,7 +36,8 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="WISC 0.1 documentation" href="index.html"/>
-        <link rel="prev" title="Prepare" href="prepare.html"/> 
+        <link rel="next" title="Sensitivity Analysis" href="sensitivity.html"/>
+        <link rel="prev" title="Prepare" href="functions.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -93,12 +94,17 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="prepare.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Prepare</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Analyze</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#create-exposure-table">Create exposure table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#estimate-losses-per-building">Estimate losses per building</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-exposure-table-for-a-country">Create exposure table for a country</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#estimate-all-losses-for-a-country">Estimate all losses for a country</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#estimate-risk-per-country">Estimate risk per country</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-exposure-table-for-all-countries">Create exposure table for all countries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#estimate-losses-for-all-countries">Estimate losses for all countries</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity.html">Sensitivity Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 </ul>
 
             
@@ -164,40 +170,73 @@
             
   <div class="section" id="analyze">
 <h1>Analyze<a class="headerlink" href="#analyze" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="create-exposure-table">
-<h2>Create exposure table<a class="headerlink" href="#create-exposure-table" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-exposure-table-for-a-country">
+<h2>Create exposure table for a country<a class="headerlink" href="#create-exposure-table-for-a-country" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.analyze.</code><code class="descname">exposure</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>parallel=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#exposure"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>”
-Creation of exposure table of the specified country</p>
+<code class="descclassname">scripts.analyze.</code><code class="descname">exposure</code><span class="sig-paren">(</span><em>country</em>, <em>include_storms=True</em>, <em>parallel=True</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#exposure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Creation of exposure table of the specified country</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.
-country {string} – ISO2 code of country to consider.</dd>
+<dd>country {string} – country to consider.</dd>
 <dt>Keyword Arguments:</dt>
-<dd>parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</dd>
+<dd>include_storms {bool} – if set to False, it will only return a list of buildings and their characteristics (default: {True})
+parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with all buildings of the country and potential exposure to wind</dd>
+<dd>GeoDataframe with all buildings of the country and potential exposure to wind</dd>
 </dl>
 </dd></dl>
 
 </div>
-<div class="section" id="estimate-losses-per-building">
-<h2>Estimate losses per building<a class="headerlink" href="#estimate-losses-per-building" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="estimate-all-losses-for-a-country">
+<h2>Estimate all losses for a country<a class="headerlink" href="#estimate-all-losses-for-a-country" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.analyze.</code><code class="descname">losses</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>parallel=True</em>, <em>storm_event_set=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#losses"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>“Estimation of the losses for all buildings in a country to the pre-defined list of storms</p>
+<code class="descclassname">scripts.analyze.</code><code class="descname">losses</code><span class="sig-paren">(</span><em>country</em>, <em>parallel=True</em>, <em>event_set=False</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#losses"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Creation of exposure table of the specified country</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.
-country {string} – ISO2 code of country to consider.</dd>
+<dd>country {string} – country to consider.</dd>
 <dt>Keyword Arguments:</dt>
-<dd>parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</dd>
+<dd>parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+event_set {bool} – if set to True, we will calculate the losses for the event set instead of the historical storms (default: {True})
+save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with all buildings of the country and their losses for each wind storm</dd>
+<dd>Geodataframe with all buildings of the country and the losses to wind storms</dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="estimate-risk-per-country">
+<h2>Estimate risk per country<a class="headerlink" href="#estimate-risk-per-country" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.analyze.</code><code class="descname">risk</code><span class="sig-paren">(</span><em>country</em>, <em>path_to_eventset</em>, <em>save=True</em>, <em>parallel=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#risk"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Estimate risk based on event set</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>country {string} – country to consider.
+path_to_eventset {string} – the location of the event set in the data directory</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="create-exposure-table-for-all-countries">
+<h2>Create exposure table for all countries<a class="headerlink" href="#create-exposure-table-for-all-countries" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.analyze.</code><code class="descname">all_countries_exposure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#all_countries_exposure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Function to estimate the exposure for all countries consecutively</p>
+</dd></dl>
+
+</div>
+<div class="section" id="estimate-losses-for-all-countries">
+<h2>Estimate losses for all countries<a class="headerlink" href="#estimate-losses-for-all-countries" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.analyze.</code><code class="descname">all_countries_losses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#all_countries_losses"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Function to estimate the losses for all countries consecutively</p>
 </dd></dl>
 
 </div>
@@ -213,8 +252,10 @@ country {string} – ISO2 code of country to consider.</dd>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="sensitivity.html" class="btn btn-neutral float-right" title="Sensitivity Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="prepare.html" class="btn btn-neutral" title="Prepare" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="functions.html" class="btn btn-neutral" title="Prepare" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

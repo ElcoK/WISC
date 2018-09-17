@@ -1,0 +1,924 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scripts.functions &mdash; WISC 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="WISC 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> WISC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyze.html">Analyze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sensitivity.html">Sensitivity Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">WISC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>scripts.functions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scripts.functions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon Jun  4 20:48:26 2018</span>
+
+<span class="sd">@author: elcok</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">rasterio</span> <span class="k">as</span> <span class="nn">rio</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">ogr</span>
+<span class="kn">import</span> <span class="nn">shapely.wkt</span>
+<span class="kn">from</span> <span class="nn">rasterstats</span> <span class="k">import</span> <span class="n">point_query</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="s1">&#39;..&#39;</span><span class="p">))</span>
+<span class="kn">from</span> <span class="nn">scripts.utils</span> <span class="k">import</span> <span class="n">load_config</span><span class="p">,</span><span class="n">get_num</span><span class="p">,</span><span class="n">int2date</span>
+
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">metrics</span>
+
+<span class="k">def</span> <span class="nf">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">event_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="p">[],</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get exposure data for single region </span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
+<span class="sd">        include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})</span>
+<span class="sd">        event_set {bool} -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})</span>
+<span class="sd">        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})</span>
+<span class="sd">   </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        GeoDataFrame with the exposure</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">country</span> <span class="o">=</span> <span class="n">region</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>    
+   
+    <span class="n">osm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">country</span><span class="p">))</span>
+    
+    <span class="n">area_poly</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_POLY&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.poly&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+    <span class="n">area_pbf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+    
+    <span class="n">clip_osm</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">osm_path</span><span class="p">,</span><span class="n">area_poly</span><span class="p">,</span><span class="n">area_pbf</span><span class="p">)</span>   
+    
+    <span class="n">gdf_table</span> <span class="o">=</span> <span class="n">fetch_buildings</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">regional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Fetched all buildings from osm data for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+
+    <span class="c1"># convert to european coordinate system for overlap</span>
+    <span class="n">gdf_table</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3035</span><span class="p">)</span>
+
+    <span class="c1"># Specify Country</span>
+    <span class="n">gdf_table</span><span class="p">[</span><span class="s2">&quot;COUNTRY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">country</span>
+    
+    <span class="c1"># give unique_id </span>
+    <span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;ID_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">region</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    
+    <span class="c1"># Calculate area</span>
+    <span class="n">gdf_table</span><span class="p">[</span><span class="s2">&quot;AREA_m2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+
+    <span class="c1"># Determine centroid</span>
+    <span class="n">gdf_table</span><span class="p">[</span><span class="s2">&quot;centroid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="c1"># Get land use</span>
+    <span class="n">nuts_eu</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;NUTS3_ETRS.shp&#39;</span><span class="p">))</span>
+
+    <span class="n">nuts_eu</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">nuts_eu</span><span class="p">[</span><span class="s1">&#39;NUTS_ID&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">region</span><span class="p">]</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span>
+                                <span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_SHAPE&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">)))</span>
+
+    <span class="n">CLC_2012</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_LANDUSE&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_LANDUSE.tif&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+    <span class="n">clip_landuse</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">CLC_2012</span><span class="p">)</span>
+
+    <span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]),</span><span class="n">CLC_2012</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">storm_list</span> <span class="o">=</span> <span class="n">load_sens_analysis_storms</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
+            <span class="n">storm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">int2date</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">outrast_storm</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])))</span>
+            <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]),</span><span class="n">outrast_storm</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>        
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">include_storms</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">event_set</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
+            <span class="n">storm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">int2date</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">outrast_storm</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])))</span>
+            <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]),</span><span class="n">outrast_storm</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>        
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">include_storms</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">event_set</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_event_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
+            <span class="n">storm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">int2date</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">outrast_storm</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])))</span>
+            <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]),</span><span class="n">outrast_storm</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>        
+
+    <span class="k">if</span> <span class="n">save</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">df_exposure</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">)</span>
+        <span class="n">df_exposure</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_exposure&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_exposure.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">)))</span>        
+
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Obtained all storm information for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">gdf_table</span>        
+
+<span class="k">def</span> <span class="nf">loss_calculation</span><span class="p">(</span><span class="n">storm</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">output_table</span><span class="p">,</span><span class="n">max_dam</span><span class="p">,</span><span class="n">curves</span><span class="p">,</span><span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the losses per storm</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        storm {string} -- date of the storm</span>
+<span class="sd">        region {string} -- NUTS3 code of region to consider</span>
+<span class="sd">        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm</span>
+<span class="sd">        max_dam {numpy array} -- table with maximum damages per building type/land-use class</span>
+<span class="sd">        curves  {dataframe} -- fragility curves for the different building types</span>
+<span class="sd">        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation</span>
+<span class="sd">   </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        GeoDataFrame including the losses for the storm</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
+    
+    <span class="n">max_dam_country</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">max_dam</span><span class="p">[</span><span class="n">max_dam</span><span class="p">[</span><span class="s1">&#39;CODE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">country</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:],</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int16&#39;</span><span class="p">)</span>    
+
+    <span class="n">df_C2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">output_table</span><span class="p">[[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">,</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">,</span><span class="n">storm</span><span class="p">]])</span>
+    <span class="n">df_C3</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">output_table</span><span class="p">[[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">,</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">,</span><span class="n">storm</span><span class="p">]])</span>
+    <span class="n">df_C4</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">output_table</span><span class="p">[[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">,</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">,</span><span class="n">storm</span><span class="p">]])</span>
+
+
+    <span class="n">df_C2</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_C2</span><span class="p">[</span><span class="n">storm</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">curves</span><span class="p">[</span><span class="s1">&#39;C2&#39;</span><span class="p">])</span> 
+    <span class="n">df_C3</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_C3</span><span class="p">[</span><span class="n">storm</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">curves</span><span class="p">[</span><span class="s1">&#39;C3&#39;</span><span class="p">])</span>
+    <span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_C4</span><span class="p">[</span><span class="n">storm</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">curves</span><span class="p">[</span><span class="s1">&#39;C4&#39;</span><span class="p">])</span> 
+ 
+    <span class="c1">#specify shares for urban and nonurban        </span>
+    <span class="n">RES_URB</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span> 
+    <span class="n">IND_URB</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span>   
+
+    <span class="n">RES_NONURB</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">IND_NONURB</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="c1"># Use pandas where to fill new column for losses</span>
+    <span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C2</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_URB</span><span class="o">+</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C2</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_URB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">23</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C2</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_NONURB</span><span class="o">+</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C2</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_NONURB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">])</span>
+
+    <span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C3</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_URB</span><span class="o">+</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C3</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_URB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">23</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C3</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_NONURB</span><span class="o">+</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C3</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_NONURB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span><span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">])</span>
+
+    <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_URB</span><span class="o">+</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_URB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">23</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_NONURB</span><span class="o">+</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_NONURB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">])</span>
+
+<span class="c1">#        # and write output </span>
+    <span class="k">return</span>  <span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>        
+
+
+<span class="k">def</span> <span class="nf">region_losses</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">storm_event_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">95</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Estimation of the losses for all buildings in a country to the pre-defined list of storms</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        region {string} -- nuts code of region to consider.</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
+<span class="sd">        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm</span>
+
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>    
+    
+    <span class="n">country</span> <span class="o">=</span> <span class="n">region</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1">#load storms</span>
+    <span class="k">if</span> <span class="n">storm_event_set</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+        <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">int2date</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_event_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+        <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">int2date</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">]</span>
+
+    <span class="c1">#load max dam</span>
+    <span class="n">max_dam</span> <span class="o">=</span> <span class="n">load_max_dam</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+  
+    <span class="c1">#load curves</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">load_curves</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+   
+    <span class="n">output_table</span> <span class="o">=</span> <span class="n">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">event_set</span><span class="o">=</span><span class="n">storm_event_set</span><span class="p">)</span>
+
+    <span class="n">no_storm_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">output_table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">)))</span>
+    <span class="n">write_output</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">output_table</span><span class="p">[</span><span class="n">no_storm_columns</span><span class="p">])</span>
+
+    <span class="c1">## Calculate losses for buildings in this NUTS region</span>
+    <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
+        <span class="n">write_output</span><span class="p">[</span><span class="n">storm</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_calculation</span><span class="p">(</span><span class="n">storm</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">output_table</span><span class="p">,</span><span class="n">max_dam</span><span class="p">,</span><span class="n">curves</span><span class="p">,</span><span class="n">sample</span><span class="p">)</span>
+    
+    <span class="n">df_losses</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">write_output</span><span class="p">)</span>
+
+    <span class="c1">## save this regional file</span>
+    <span class="k">if</span> <span class="n">storm_event_set</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">df_losses</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_losses&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_losses.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">)))</span>
+ 
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Finished with loss calculation for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+    
+        <span class="k">return</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">write_output</span><span class="p">))</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#Numpify data</span>
+        <span class="n">pdZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df_losses</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">write_output</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+       
+        <span class="n">output_</span> <span class="o">=</span><span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">pdZ</span><span class="p">:</span>
+            <span class="n">H</span><span class="p">,</span><span class="n">X1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">normed</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">)</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">X1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">X1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">F1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">H</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span>
+            <span class="n">output_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">auc</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">F1</span><span class="p">))</span>
+        
+        <span class="n">df_losses</span><span class="p">[</span><span class="s1">&#39;Risk&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_</span>
+        
+        <span class="n">df_losses</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_risk&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_risk.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">)))</span>
+
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Finished with risk calculation for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+        
+        <span class="k">return</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">write_output</span><span class="p">))</span>
+    
+
+<span class="k">def</span> <span class="nf">region_sens_analysis</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">samples</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="p">[],</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Estimation of the losses for all buildings in a country to the pre-defined list of storms</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        region {string} -- nuts code of region to consider.</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
+<span class="sd">        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm</span>
+
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>    
+    
+    <span class="n">country</span> <span class="o">=</span> <span class="n">region</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># select storms to assess</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]</span>
+
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+
+    <span class="n">all_combis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span><span class="n">storm_name_list</span><span class="p">))</span>
+
+    <span class="c1">#load max dam</span>
+    <span class="n">max_dam</span> <span class="o">=</span> <span class="n">load_max_dam</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+  
+    <span class="c1">#load curves</span>
+    <span class="n">curves</span> <span class="o">=</span> <span class="n">load_curves</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+
+    <span class="c1"># get exposure table   </span>
+    <span class="n">output_table</span> <span class="o">=</span> <span class="n">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">)</span>
+    
+    <span class="c1"># calculate losses for all combinations</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">))),</span><span class="n">columns</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">iter_</span><span class="p">,(</span><span class="n">sample</span><span class="p">,</span><span class="n">storm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_combis</span><span class="p">):</span>
+        <span class="n">output_file</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">iter_</span><span class="p">,</span><span class="n">storm</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">loss_calculation</span><span class="p">(</span><span class="n">storm</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">output_table</span><span class="p">,</span><span class="n">max_dam</span><span class="p">,</span><span class="n">curves</span><span class="p">,</span><span class="n">sample</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">save</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">output_file</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_sens_analysis&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">)))</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">storm_exposure</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">):</span>
+    
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>    
+    <span class="c1">#==============================================================================</span>
+    <span class="c1"># Loop through storms</span>
+    <span class="c1">#==============================================================================</span>
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">outrast_storm</span><span class="p">)</span>
+        <span class="n">storm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_num</span><span class="p">(</span><span class="n">outrast_storm</span><span class="p">[</span><span class="o">-</span><span class="mi">23</span><span class="p">:]))</span>
+        <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">point_query</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]),</span><span class="n">outrast_storm</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_table</span>
+
+<span class="k">def</span> <span class="nf">get_storm_data</span><span class="p">(</span><span class="n">storm_path</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">rio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">storm_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>    
+        <span class="c1"># Read as numpy array</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">affine_storm</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">affine</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">,</span><span class="n">affine_storm</span>
+
+<div class="viewcode-block" id="extract_buildings"><a class="viewcode-back" href="../../functions.html#scripts.functions.extract_buildings">[docs]</a><span class="k">def</span> <span class="nf">extract_buildings</span><span class="p">(</span><span class="n">area</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">NUTS3</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        area {[type]} -- [description]</span>
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">    </span>
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        NUTS3 {bool} -- [description] (default: {True})</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get data path</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">wgs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_BUILDINGS&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_buildings.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">NUTS3</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">pbf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pbf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area</span><span class="p">))</span>
+  
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;ogr2ogr -progress -f &quot;ESRI shapefile&quot; </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> -sql &quot;select </span><span class="se">\</span>
+<span class="s1">              building,amenity from multipolygons where building is not null&quot; </span><span class="se">\</span>
+<span class="s1">              -lco ENCODING=UTF-8 -nlt POLYGON -skipfailures&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wgs</span><span class="p">,</span><span class="n">pbf</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="convert_buildings"><a class="viewcode-back" href="../../functions.html#scripts.functions.convert_buildings">[docs]</a><span class="k">def</span> <span class="nf">convert_buildings</span><span class="p">(</span><span class="n">area</span><span class="p">,</span><span class="n">country</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts the coordinate system from EPSG:4326 to EPSG:3035.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        area {string} -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system </span>
+
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        geodataframe -- Geopandas dataframe with all buildings of the selected area</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get data path</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="c1"># path to area with buildings</span>
+    <span class="n">etrs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_BUILDINGS&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_buildings.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area</span><span class="p">))</span>
+
+    <span class="c1"># load data </span>
+    <span class="n">input_</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">etrs</span><span class="p">)</span>
+
+    <span class="n">input_</span> <span class="o">=</span> <span class="n">input_</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3035</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">input_</span></div>
+    
+<div class="viewcode-block" id="get_storm_list"><a class="viewcode-back" href="../../functions.html#scripts.functions.get_storm_list">[docs]</a><span class="k">def</span> <span class="nf">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Small function to create a list of with path strings to all storms</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list -- list with the path strings of all storms</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+   
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.tif&#39;</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">filename_storm</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> 
+                <span class="p">(</span><span class="n">fileshortname_storm</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename_storm</span><span class="p">)</span> 
+                <span class="n">resample_storm</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">fileshortname_storm</span><span class="o">+</span><span class="s1">&#39;.tif&#39;</span><span class="p">)</span>
+                <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resample_storm</span><span class="p">)</span>    
+
+    <span class="k">return</span> <span class="n">storm_list</span></div>
+
+<span class="k">def</span> <span class="nf">get_event_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;event_set&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.tif&#39;</span><span class="p">):</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;event_set&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>
+                <span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">filename_storm</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> 
+                <span class="p">(</span><span class="n">fileshortname_storm</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename_storm</span><span class="p">)</span> 
+                <span class="n">resample_storm</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;event_set&#39;</span><span class="p">,</span><span class="n">fileshortname_storm</span><span class="o">+</span><span class="s1">&#39;.tif&#39;</span><span class="p">)</span>
+                <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resample_storm</span><span class="p">)</span>    
+
+    <span class="k">return</span> <span class="n">storm_list</span>    
+
+<div class="viewcode-block" id="load_max_dam"><a class="viewcode-back" href="../../functions.html#scripts.functions.load_max_dam">[docs]</a><span class="k">def</span> <span class="nf">load_max_dam</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Small function to load the excel with maximum damages.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dataframe -- pandas dataframe with maximum damages per landuse</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;max_dam2.xlsx&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="load_curves"><a class="viewcode-back" href="../../functions.html#scripts.functions.load_curves">[docs]</a><span class="k">def</span> <span class="nf">load_curves</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Small function to load the csv file with the different fragility curves.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dataframe -- pandas dataframe with fragility curves</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;CURVES.csv&#39;</span><span class="p">),</span><span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span><span class="s1">&#39;C4&#39;</span><span class="p">,</span><span class="s1">&#39;C5&#39;</span><span class="p">,</span><span class="s1">&#39;C6&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="load_sample"><a class="viewcode-back" href="../../functions.html#scripts.functions.load_sample">[docs]</a><span class="k">def</span> <span class="nf">load_sample</span><span class="p">(</span><span class="n">country</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Will load the ratio of each curve and landuse to be used.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple -- tuple of ratios for the selected country</span>
+<span class="sd">        </span>
+<span class="sd">        [&#39;c2&#39;, &#39;c3&#39;, &#39;c4&#39;,&#39;lu1&#39;,&#39;lu2&#39;]</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dict_</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">95</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span> 
+                         <span class="p">(</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">55</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)),</span> 
+                         <span class="p">(</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span> 
+                         <span class="p">(</span><span class="s1">&#39;DE&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">5</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">35</span><span class="p">,</span><span class="mi">65</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">70</span><span class="p">)),</span> 
+                         <span class="p">(</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">55</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span> 
+                         <span class="p">(</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span> <span class="p">(</span> <span class="mi">5</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">65</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">))])</span>
+
+    <span class="k">return</span> <span class="n">dict_</span><span class="p">[</span><span class="n">country</span><span class="p">]</span></div>
+
+<span class="k">def</span> <span class="nf">load_osm_data</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">regional</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function loads the OSM file for the country</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path</span>
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
+<span class="sd">        regional {boolean} -- set to False by default</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        opened OSM file to use in the fetch_roads function</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">regional</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+        <span class="n">osm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">country</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">osm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_OSM&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+        
+
+    <span class="n">driver</span><span class="o">=</span><span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;OSM&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">driver</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">osm_path</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fetch_buildings</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">regional</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function directly reads the building data from osm, instead of first converting it to a shapefile</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path</span>
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
+<span class="sd">        regional {boolean} -- set to False by default</span>
+<span class="sd">     </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        geodataframe with all buildings</span>
+<span class="sd">     </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">load_osm_data</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">regional</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">sql_lyr</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ExecuteSQL</span><span class="p">(</span><span class="s2">&quot;SELECT osm_id,building,amenity from multipolygons where building is not null&quot;</span><span class="p">)</span>
+    
+    <span class="n">roads</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">sql_lyr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;building&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">osm_id</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;osm_id&#39;</span><span class="p">)</span>
+            <span class="n">shapely_geo</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">wkt</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">feature</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">ExportToWkt</span><span class="p">())</span> 
+            <span class="k">if</span> <span class="n">shapely_geo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">highway</span><span class="o">=</span><span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;building&#39;</span><span class="p">)</span>
+            <span class="n">amenity</span><span class="o">=</span><span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;amenity&#39;</span><span class="p">)</span>
+            <span class="n">roads</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">osm_id</span><span class="p">,</span><span class="n">highway</span><span class="p">,</span><span class="n">amenity</span><span class="p">,</span><span class="n">shapely_geo</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">roads</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">roads</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;osm_id&#39;</span><span class="p">,</span><span class="s1">&#39;building&#39;</span><span class="p">,</span><span class="s1">&#39;amenity&#39;</span><span class="p">,</span><span class="s1">&#39;geometry&#39;</span><span class="p">],</span><span class="n">crs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="s1">&#39;epsg:4326&#39;</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No buildings in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">country</span><span class="p">))</span>
+    
+<div class="viewcode-block" id="poly_files"><a class="viewcode-back" href="../../functions.html#scripts.functions.poly_files">[docs]</a><span class="k">def</span> <span class="nf">poly_files</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function will create the .poly files from the nuts shapefile. These</span>
+<span class="sd">    .poly files are used to extract data from the openstreetmap files.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is adapted from the OSMPoly function in QGIS.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path: base path to location of all files.</span>
+<span class="sd">        </span>
+<span class="sd">        country: string name of country ISO2.</span>
+<span class="sd">   </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        .poly file for each NUTS3 in a new dir in the working directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>     
+   
+<span class="c1"># =============================================================================</span>
+<span class="c1">#     &quot;&quot;&quot; Create output dir for .poly files if it is doesnt exist yet&quot;&quot;&quot;</span>
+<span class="c1"># =============================================================================</span>
+    <span class="n">poly_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_POLY&#39;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">poly_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">poly_dir</span><span class="p">)</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1">#   &quot;&quot;&quot;Load country shapes and country list and only keep the required countries&quot;&quot;&quot;</span>
+<span class="c1"># =============================================================================</span>
+    <span class="n">wb_poly</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;NUTS3_ETRS.shp&#39;</span><span class="p">))</span>
+    
+    <span class="c1"># filter polygon file</span>
+    <span class="n">country_poly</span> <span class="o">=</span> <span class="n">wb_poly</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">wb_poly</span><span class="p">[</span><span class="s1">&#39;NUTS_ID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">country</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wb_poly</span><span class="p">[</span><span class="s1">&#39;STAT_LEVL_&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">3</span><span class="p">)]</span>
+
+    <span class="n">country_poly</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span> <span class="p">:</span><span class="s1">&#39;epsg:3035&#39;</span><span class="p">}</span>
+
+    <span class="n">country_poly</span> <span class="o">=</span> <span class="n">country_poly</span><span class="o">.</span><span class="n">to_crs</span><span class="p">({</span><span class="s1">&#39;init&#39;</span><span class="p">:</span> <span class="s1">&#39;epsg:4326&#39;</span><span class="p">})</span>
+    
+<span class="c1"># =============================================================================</span>
+<span class="c1">#   &quot;&quot;&quot; The important part of this function: create .poly files to clip the country </span>
+<span class="c1">#   data from the openstreetmap file &quot;&quot;&quot;    </span>
+<span class="c1"># =============================================================================</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># iterate over the counties (rows) in the world shapefile</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">country_poly</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">num</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">geom</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">geometry</span>
+
+<span class="c1">#        try:</span>
+        <span class="c1"># this will create a list of the different subpolygons</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s1">&#39;MultiPolygon&#39;</span><span class="p">:</span>
+            <span class="n">polygons</span> <span class="o">=</span> <span class="n">geom</span>
+        
+        <span class="c1"># the list will be lenght 1 if it is just one polygon</span>
+        <span class="k">elif</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s1">&#39;Polygon&#39;</span><span class="p">:</span>
+            <span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom</span><span class="p">]</span>
+
+        <span class="c1"># define the name of the output file, based on the ISO3 code</span>
+        <span class="n">attr</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;NUTS_ID&#39;</span><span class="p">]</span>
+        
+        <span class="c1"># start writing the .poly file</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">poly_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">attr</span> <span class="o">+</span><span class="s1">&#39;.poly&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">attr</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># loop over the different polygons, get their exterior and write the </span>
+        <span class="c1"># coordinates of the ring to the .poly file</span>
+        <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="n">polygons</span><span class="p">:</span>
+            <span class="n">polygon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span><span class="p">)</span>
+
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ring</span> <span class="ow">in</span> <span class="n">polygon</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ring</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;     &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ring</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="c1"># close the ring of one subpolygon if done</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END&quot;</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># close the file when done</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;END&quot;</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="clip_landuse"><a class="viewcode-back" href="../../functions.html#scripts.functions.clip_landuse">[docs]</a><span class="k">def</span> <span class="nf">clip_landuse</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">outrast_lu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clip the landuse from the European Corine Land Cover (CLC) map to the considered country</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        outrast_lu {string} -- string path to location of Corine Land Cover dataset </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">inraster</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;g100_clc12_V18_5.tif&#39;</span><span class="p">)</span>
+    
+    <span class="n">inshape</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_SHAPE&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.shp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+   
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">&quot;gdalwarp&quot;</span><span class="p">,</span><span class="s2">&quot;-q&quot;</span><span class="p">,</span><span class="s2">&quot;-overwrite&quot;</span><span class="p">,</span><span class="s2">&quot;-srcnodata&quot;</span><span class="p">,</span><span class="s2">&quot;-9999&quot;</span><span class="p">,</span><span class="s2">&quot;-co&quot;</span><span class="p">,</span><span class="s2">&quot;compress=lzw&quot;</span><span class="p">,</span><span class="s2">&quot;-tr&quot;</span><span class="p">,</span><span class="s2">&quot;100&quot;</span><span class="p">,</span><span class="s2">&quot;-100&quot;</span><span class="p">,</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span><span class="s2">&quot;near&quot;</span><span class="p">,</span><span class="n">inraster</span><span class="p">,</span> <span class="n">outrast_lu</span><span class="p">,</span> <span class="s2">&quot;-cutline&quot;</span><span class="p">,</span> <span class="n">inshape</span><span class="p">,</span><span class="s2">&quot;-crop_to_cutline&quot;</span><span class="p">])</span></div>
+ 
+
+<div class="viewcode-block" id="clip_osm"><a class="viewcode-back" href="../../functions.html#scripts.functions.clip_osm">[docs]</a><span class="k">def</span> <span class="nf">clip_osm</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">osm_path</span><span class="p">,</span><span class="n">area_poly</span><span class="p">,</span><span class="n">area_pbf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. </span>
+<span class="sd">    This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</span>
+<span class="sd">    </span>
+<span class="sd">    This function uses the osmconvert tool, which can be found at http://wiki.openstreetmap.org/wiki/Osmconvert. </span>
+<span class="sd">    </span>
+<span class="sd">    Either add the directory where this executable is located to your environmental variables or just put it in the &#39;scripts&#39; directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        osm_path: path string to the osm.pbf file of the continent associated with the country.</span>
+<span class="sd">        </span>
+<span class="sd">        area_poly: path string to the .poly file, made through the &#39;create_poly_files&#39; function.</span>
+<span class="sd">        </span>
+<span class="sd">        area_pbf: path string indicating the final output dir and output name of the new .osm.pbf file.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        a clipped .osm.pbf file.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+
+    <span class="n">osm_convert_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;osmconvert&#39;</span><span class="p">,</span><span class="s1">&#39;osmconvert64&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">area_pbf</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">  </span><span class="si">{}</span><span class="s1"> -B=</span><span class="si">{}</span><span class="s1"> --complete-ways -o=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">osm_convert_path</span><span class="p">,</span><span class="n">osm_path</span><span class="p">,</span><span class="n">area_poly</span><span class="p">,</span><span class="n">area_pbf</span><span class="p">))</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> did not finish!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area_pbf</span><span class="p">))</span></div>
+        
+<span class="k">def</span> <span class="nf">load_sens_analysis_storms</span><span class="p">(</span><span class="n">storm_name_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This file load the storms used to perform the sensitivity analysis. </span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+                    
+<span class="k">def</span> <span class="nf">summary_statistics_losses</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates the file &#39;output_storms.xlsx&#39;. This file is required to create the summary figures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    
+    <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span><span class="s1">&#39;DE&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span><span class="s1">&#39;PL&#39;</span><span class="p">,</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span><span class="s1">&#39;FI&#39;</span><span class="p">]</span> 
+
+    <span class="n">first_line</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_losses&#39;</span><span class="p">,</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;LU00_losses.csv&#39;</span><span class="p">),</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">extract</span> <span class="o">=</span> <span class="n">first_line</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">storm_name_list</span> <span class="o">=</span> <span class="n">extract</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>
+    
+    <span class="n">output_storms</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+    <span class="n">output_storms_res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+    <span class="n">output_storms_ind_com</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+
+    <span class="n">output_storms_transport</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+    <span class="n">output_storms_other</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+    <span class="n">output_storms_agri</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">countries</span><span class="p">))),</span><span class="n">index</span><span class="o">=</span><span class="n">storm_name_list</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">countries</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">country</span> <span class="ow">in</span> <span class="n">countries</span><span class="p">:</span>
+       <span class="n">output_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+       <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_losses&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">)):</span>
+           <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">output_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_losses&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">file</span><span class="p">),</span> <span class="n">usecols</span><span class="o">=</span><span class="n">extract</span><span class="p">)</span>
+                <span class="n">output_table</span> <span class="o">=</span> <span class="n">output_table</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+                <span class="n">output_table</span> <span class="o">=</span> <span class="n">output_table</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="c1"># TOTAL</span>
+                <span class="n">output_storms</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">output_table</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>
+                <span class="c1"># RESIDENTIAL</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">output_table</span><span class="p">[</span><span class="n">output_table</span><span class="o">.</span><span class="n">CLC_2012</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">]</span>
+                <span class="n">output_storms_res</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>     
+                <span class="c1"># COM/IND</span>
+                <span class="n">ind_com</span> <span class="o">=</span> <span class="n">output_table</span><span class="p">[</span><span class="n">output_table</span><span class="o">.</span><span class="n">CLC_2012</span> <span class="o">==</span> <span class="mi">3</span><span class="p">]</span>
+                <span class="n">output_storms_ind_com</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">ind_com</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>
+                <span class="c1"># TRANSPORT,PORTS,AIRPORTS</span>
+                <span class="n">transport</span> <span class="o">=</span> <span class="n">output_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">output_table</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">))[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">output_storms_transport</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">transport</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>
+                <span class="c1"># OTHER BUILT-UP</span>
+                <span class="n">other</span> <span class="o">=</span> <span class="n">output_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">output_table</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">))[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">output_storms_other</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">other</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>
+                <span class="c1"># AGRICULTURAL BUILDINGS</span>
+                <span class="n">agri</span> <span class="o">=</span> <span class="n">output_table</span><span class="p">[</span><span class="n">output_table</span><span class="o">.</span><span class="n">CLC_2012</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">]</span>
+                <span class="n">output_storms_agri</span><span class="p">[</span><span class="n">country</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">agri</span><span class="p">[</span><span class="n">storm_name_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="mi">1000000</span><span class="p">)</span>
+    
+    <span class="n">output_storms</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_storms_res</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms_res</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_storms_ind_com</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms_ind_com</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_storms_transport</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms_transport</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_storms_other</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms_other</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_storms_agri</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_storms_agri</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_storms.xlsx&#39;</span><span class="p">))</span>
+    <span class="n">output_storms</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;total_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">output_storms_res</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;res_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">output_storms_ind_com</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;ind_com_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">output_storms_transport</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;transport_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">output_storms_other</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;other_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">output_storms_agri</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;agri_losses&#39;</span><span class="p">,</span><span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Storm&#39;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Elco Koks.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

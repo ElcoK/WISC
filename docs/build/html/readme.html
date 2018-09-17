@@ -94,8 +94,10 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="prepare.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Prepare</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity.html">Sensitivity Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 </ul>
 
             
@@ -165,14 +167,15 @@
 <p>The most easiest way to do so is to use the requirements.yml file as provided in the github page.</p>
 <p><em>To create the environment using the yaml file:</em></p>
 <blockquote>
-<div><div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yml</span>
+<div><div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yml</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>In case of no access to the GitHub page, the other option would be to copy-paste the list below and save this to an <cite>environment.yml</cite> file (note the indendation):</p>
 <blockquote>
-<div><div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="n">WISC</span>
-   <span class="n">dependencies</span><span class="p">:</span>
+<div><div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="n">WISC</span>
+
+<span class="n">dependencies</span><span class="p">:</span>
         <span class="o">-</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span>
         <span class="o">-</span> <span class="n">gdal</span>
         <span class="o">-</span> <span class="n">numpy</span>
@@ -181,6 +184,12 @@
         <span class="o">-</span> <span class="n">pathos</span>
         <span class="o">-</span> <span class="n">rasterio</span>
         <span class="o">-</span> <span class="n">rasterstats</span>
+        <span class="o">-</span> <span class="n">matplotlib</span>
+        <span class="o">-</span> <span class="n">basemap</span>
+        <span class="o">-</span> <span class="n">SAlib</span>
+        <span class="o">-</span> <span class="n">urllib3</span>
+        <span class="o">-</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span>
+        <span class="o">-</span> <span class="n">xlrd</span>
 </pre></div>
 </div>
 </div></blockquote>

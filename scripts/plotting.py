@@ -16,9 +16,11 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import Normalize
-from matplotlib import colors
 import matplotlib.cm
+from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+
 
 # make connection to all the scripts
 sys.path.append(os.path.join( '..'))

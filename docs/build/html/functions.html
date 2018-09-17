@@ -96,7 +96,6 @@
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Prepare</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#create-poly-files">Create .poly files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#create-first-version-of-exposure-table">Create first version of exposure table</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#extract-buildings-from-openstreetmap">Extract buildings from OpenStreetMap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#convert-buildings-table-from-epsg-4326-to-epsg-3035">Convert buildings table from EPSG:4326 to EPSG:3035</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#build-list-of-storms">Build list of storms</a></li>
@@ -108,6 +107,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity.html">Sensitivity Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 </ul>
 
             
@@ -158,7 +159,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/prepare.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/functions.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -177,7 +178,7 @@
 <h2>Create .poly files<a class="headerlink" href="#create-poly-files" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">poly_files</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#poly_files"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">poly_files</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#poly_files"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>This function will create the .poly files from the nuts shapefile. These
 .poly files are used to extract data from the openstreetmap files.</p>
 <p>This function is adapted from the OSMPoly function in QGIS.</p>
@@ -187,24 +188,7 @@
 <p class="last">country: string name of country ISO2.</p>
 </dd>
 <dt>Returns:</dt>
-<dd>.poly file for each nuts2 in a new dir in the working directory.</dd>
-</dl>
-</dd></dl>
-
-</div>
-<div class="section" id="create-first-version-of-exposure-table">
-<h2>Create first version of exposure table<a class="headerlink" href="#create-first-version-of-exposure-table" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">buildings</code><span class="sig-paren">(</span><em>country</em>, <em>parallel=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#buildings"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>[summary]</p>
-<dl class="docutils">
-<dt>Arguments:</dt>
-<dd>country {string} – ISO2 code of country to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>parallel {bool} – [description] (default: {True})</dd>
-<dt>Returns:</dt>
-<dd>[type] – [description]</dd>
+<dd>.poly file for each NUTS3 in a new dir in the working directory.</dd>
 </dl>
 </dd></dl>
 
@@ -213,14 +197,14 @@
 <h2>Extract buildings from OpenStreetMap<a class="headerlink" href="#extract-buildings-from-openstreetmap" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">extract_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em>, <em>nuts2=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#extract_buildings"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>[summary]</p>
+<code class="descclassname">scripts.functions.</code><code class="descname">extract_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em>, <em>NUTS3=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#extract_buildings"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
 <dd>area {[type]} – [description]
 country {string} – ISO2 code of country to consider.</dd>
 <dt>Keyword Arguments:</dt>
-<dd>nuts2 {bool} – [description] (default: {True})</dd>
+<dd>NUTS3 {bool} – [description] (default: {True})</dd>
 </dl>
 </dd></dl>
 
@@ -229,11 +213,11 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Convert buildings table from EPSG:4326 to EPSG:3035<a class="headerlink" href="#convert-buildings-table-from-epsg-4326-to-epsg-3035" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">convert_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#convert_buildings"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">convert_buildings</code><span class="sig-paren">(</span><em>area</em>, <em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#convert_buildings"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Converts the coordinate system from EPSG:4326 to EPSG:3035.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd><p class="first">area {string} – name of area (most often NUTS2) for which buildings should be converted to European coordinate system</p>
+<dd><p class="first">area {string} – name of area (most often NUTS3) for which buildings should be converted to European coordinate system</p>
 <p class="last">country {string} – ISO2 code of country to consider.</p>
 </dd>
 <dt>Returns:</dt>
@@ -246,7 +230,7 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Build list of storms<a class="headerlink" href="#build-list-of-storms" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">get_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#get_storm_list"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">get_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#get_storm_list"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Small function to create a list of with path strings to all storms</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
@@ -261,7 +245,7 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Load table of maximum damages<a class="headerlink" href="#load-table-of-maximum-damages" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">load_max_dam</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_max_dam"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">load_max_dam</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#load_max_dam"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Small function to load the excel with maximum damages.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
@@ -276,7 +260,7 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Load fragility curves<a class="headerlink" href="#load-fragility-curves" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">load_curves</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_curves"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">load_curves</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#load_curves"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Small function to load the csv file with the different fragility curves.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
@@ -291,13 +275,15 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Load curves ratios<a class="headerlink" href="#load-curves-ratios" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">load_sample</code><span class="sig-paren">(</span><em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#load_sample"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">load_sample</code><span class="sig-paren">(</span><em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#load_sample"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Will load the ratio of each curve and landuse to be used.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
 <dd>country {string} – ISO2 code of country to consider.</dd>
 <dt>Returns:</dt>
-<dd>tuple – tuple of ratios for the selected country</dd>
+<dd><p class="first">tuple – tuple of ratios for the selected country</p>
+<p class="last">[‘c2’, ‘c3’, ‘c4’,’lu1’,’lu2’]</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -306,7 +292,7 @@ country {string} – ISO2 code of country to consider.</dd>
 <h2>Clip landuse<a class="headerlink" href="#clip-landuse" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">clip_landuse</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>outrast_lu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#clip_landuse"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">clip_landuse</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>region</em>, <em>outrast_lu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#clip_landuse"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Clip the landuse from the European Corine Land Cover (CLC) map to the considered country</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
@@ -321,7 +307,7 @@ outrast_lu {string} – string path to location of Corine Land Cover dataset</dd
 <h2>Clip OpenStreetMap file<a class="headerlink" href="#clip-openstreetmap-file" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descclassname">scripts.prepare.</code><code class="descname">clip_osm</code><span class="sig-paren">(</span><em>data_path</em>, <em>osm_path</em>, <em>area_poly</em>, <em>area_pbf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/prepare.html#clip_osm"><span class="viewcode-link">[source]</span></a></dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">clip_osm</code><span class="sig-paren">(</span><em>data_path</em>, <em>osm_path</em>, <em>area_poly</em>, <em>area_pbf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#clip_osm"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. 
 This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</p>
 <p>This function uses the osmconvert tool, which can be found at <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Osmconvert">http://wiki.openstreetmap.org/wiki/Osmconvert</a>.</p>
