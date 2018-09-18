@@ -51,6 +51,7 @@ def create_folder_structure(data_path,country):
     
     Arguments:
         *base_path (string) -- path to directory where folder structure should be created.
+        
         *regionalized* (bool) -- specify whether also the folders for a regionalized analyse should be created (default: **True**)
     """
     
