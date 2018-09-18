@@ -1,5 +1,7 @@
 # WISC Windstorm Loss and Risk Model
 
+[![Documentation Status](https://readthedocs.org/projects/wisc/badge/?version=latest)](https://wisc.readthedocs.io/en/latest/?badge=latest)
+
 Python implementation of the WISC (Windstorm Information Service) Loss and Risk model.
 
 Please refer to the [ReadTheDocs](http://wisc.readthedocs.io/) of this project for the full documentation of all functions. 
