@@ -51,4 +51,4 @@ activate WISC
 
 
 ### License
-Copyright (C) 2018 Elco Koks. All versions released under the [MIT license](LICENSE.md).
+Copyright (C) 2018 Elco Koks. All versions released under the [MIT license](LICENSE).
