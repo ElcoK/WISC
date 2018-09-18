@@ -34,4 +34,5 @@ In case of no access to the GitHub page, the other option would be to copy-paste
 			- urllib3
 			- scikit-learn
 			- xlrd
+			- tqdm
 	

@@ -32,3 +32,13 @@ Get integer from string
 -----------------------------------------   
 .. autofunction:: scripts.utils.get_num
    :noindex:
+
+Create dictionary with country names in GeoFabrik
+--------------------------------------------------
+.. autofunction:: scripts.utils.country_dict_geofabrik
+   :noindex:
+
+Download OSM file from GeoFabrik
+--------------------------------------------------
+.. autofunction:: scripts.utils.download_osm_file
+   :noindex:

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     storms_path =  load_config()['paths']['hazard_data']    
     
     # set country
-    country = 'LU'
+    country = 'IE'
     
     #set folder structure for calculation
     create_folder_structure(data_path,country)

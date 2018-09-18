@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Prepare &mdash; WISC 0.1 documentation</title>
+  <title>Functions &mdash; WISC 0.1 documentation</title>
   
 
   
@@ -94,16 +94,26 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Prepare</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#regional-exposure">Regional exposure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#regional-losses">Regional losses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#regional-sensitivity-analysis">Regional sensitivity analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loss-calculation">Loss calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fetch-buildings-from-openstreetmap">Fetch buildings from OpenStreetMap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-poly-files">Create .poly files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#extract-buildings-from-openstreetmap">Extract buildings from OpenStreetMap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#convert-buildings-table-from-epsg-4326-to-epsg-3035">Convert buildings table from EPSG:4326 to EPSG:3035</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#build-list-of-storms">Build list of storms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-list-of-storms-for-event-set">Build list of storms for event set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-storms-for-sensitivity-analysis">Load storms for sensitivity analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#load-table-of-maximum-damages">Load table of maximum damages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#load-fragility-curves">Load fragility curves</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#load-curves-ratios">Load curves ratios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-openstreetmap-data">Load OpenStreetMap data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clip-landuse">Clip landuse</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clip-openstreetmap-file">Clip OpenStreetMap file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#obtain-raster-value-from-geotiff-grid">Obtain raster value from geotiff grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-excel-file-with-summary-statistics">Create excel file with summary statistics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
@@ -153,7 +163,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Prepare</li>
+      <li>Functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -172,8 +182,100 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="prepare">
-<h1>Prepare<a class="headerlink" href="#prepare" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="functions">
+<h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="regional-exposure">
+<h2>Regional exposure<a class="headerlink" href="#regional-exposure" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">region_exposure</code><span class="sig-paren">(</span><em>region</em>, <em>include_storms=True</em>, <em>event_set=False</em>, <em>sens_analysis_storms=[]</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_exposure"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get exposure data for single region</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>region {string} – NUTS3 code of region to consider.
+include_storms {bool} – if set to False, it will only return a list of buildings and their characteristics (default: {True})
+event_set {bool} – if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})
+save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
+<dt>Returns:</dt>
+<dd>GeoDataFrame with the exposure</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="regional-losses">
+<h2>Regional losses<a class="headerlink" href="#regional-losses" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">region_losses</code><span class="sig-paren">(</span><em>region</em>, <em>storm_event_set=False</em>, <em>sample=(5</em>, <em>0</em>, <em>95</em>, <em>20</em>, <em>80)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_losses"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>“Estimation of the losses for all buildings in a country to the pre-defined list of storms</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>region {string} – nuts code of region to consider.</dd>
+<dt>Keyword Arguments:</dt>
+<dd>storm_event_set {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+sample {tuple} – tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</dd>
+<dt>Returns:</dt>
+<dd>dataframe – pandas dataframe with all buildings of the region and their losses for each wind storm</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="regional-sensitivity-analysis">
+<h2>Regional sensitivity analysis<a class="headerlink" href="#regional-sensitivity-analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">region_sens_analysis</code><span class="sig-paren">(</span><em>region</em>, <em>samples</em>, <em>sens_analysis_storms=[]</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_sens_analysis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>“Estimation of the losses for all buildings in a country to the pre-defined list of storms</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>region {string} – nuts code of region to consider.</dd>
+<dt>Keyword Arguments:</dt>
+<dd>storm_event_set {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+sample {tuple} – tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</dd>
+<dt>Returns:</dt>
+<dd>dataframe – pandas dataframe with all buildings of the region and their losses for each wind storm</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="loss-calculation">
+<h2>Loss calculation<a class="headerlink" href="#loss-calculation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">loss_calculation</code><span class="sig-paren">(</span><em>storm</em>, <em>country</em>, <em>output_table</em>, <em>max_dam</em>, <em>curves</em>, <em>sample</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#loss_calculation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the losses per storm</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>storm {string} – date of the storm
+region {string} – NUTS3 code of region to consider
+output_table – GeoDataFrame with all buildings and the wind speed values for each storm
+max_dam {numpy array} – table with maximum damages per building type/land-use class
+curves  {dataframe} – fragility curves for the different building types
+sample {list} – ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation</dd>
+<dt>Returns:</dt>
+<dd>GeoDataFrame including the losses for the storm</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="fetch-buildings-from-openstreetmap">
+<h2>Fetch buildings from OpenStreetMap<a class="headerlink" href="#fetch-buildings-from-openstreetmap" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">fetch_buildings</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>region=''</em>, <em>regional=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#fetch_buildings"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function directly reads the building data from osm, instead of first converting it to a shapefile</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path
+country {string} – ISO2 code of country to consider.
+region {string} – NUTS3 code of region to consider.
+regional {boolean} – set to False by default</dd>
+<dt>Returns:</dt>
+<dd>geodataframe with all buildings</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="create-poly-files">
 <h2>Create .poly files<a class="headerlink" href="#create-poly-files" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -241,6 +343,27 @@ country {string} – ISO2 code of country to consider.</dd>
 </dd></dl>
 
 </div>
+<div class="section" id="build-list-of-storms-for-event-set">
+<h2>Build list of storms for event set<a class="headerlink" href="#build-list-of-storms-for-event-set" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">get_event_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#get_event_storm_list"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="load-storms-for-sensitivity-analysis">
+<h2>Load storms for sensitivity analysis<a class="headerlink" href="#load-storms-for-sensitivity-analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">load_sens_analysis_storms</code><span class="sig-paren">(</span><em>storm_name_list=['19991203', '19900125', '20090124', '20070118', '19991226']</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#load_sens_analysis_storms"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This file load the storms used to perform the sensitivity analysis.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="load-table-of-maximum-damages">
 <h2>Load table of maximum damages<a class="headerlink" href="#load-table-of-maximum-damages" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -288,6 +411,24 @@ country {string} – ISO2 code of country to consider.</dd>
 </dd></dl>
 
 </div>
+<div class="section" id="load-openstreetmap-data">
+<h2>Load OpenStreetMap data<a class="headerlink" href="#load-openstreetmap-data" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">load_osm_data</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>region=''</em>, <em>regional=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#load_osm_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function loads the OSM file for the country</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>data_path
+country {string} – ISO2 code of country to consider.
+region {string} – NUTS3 code of region to consider.
+regional {boolean} – set to False by default</dd>
+<dt>Returns:</dt>
+<dd>opened OSM file to use in the fetch_roads function</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="clip-landuse">
 <h2>Clip landuse<a class="headerlink" href="#clip-landuse" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -321,6 +462,30 @@ This is much faster compared to clipping the osm.pbf file while extracting throu
 <dt>Returns:</dt>
 <dd>a clipped .osm.pbf file.</dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="obtain-raster-value-from-geotiff-grid">
+<h2>Obtain raster value from geotiff grid<a class="headerlink" href="#obtain-raster-value-from-geotiff-grid" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">get_raster_value</code><span class="sig-paren">(</span><em>centroid</em>, <em>out_image</em>, <em>out_transform</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#get_raster_value"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Small function to obtain raster value from rastermap, using point_query.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>centroid {geometry} : 
+out_image {numpy array} : numpy array of grid
+out_transform {Affine} : georeference of numpy array</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="create-excel-file-with-summary-statistics">
+<h2>Create excel file with summary statistics<a class="headerlink" href="#create-excel-file-with-summary-statistics" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.functions.</code><code class="descname">summary_statistics_losses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#summary_statistics_losses"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function creates the file ‘output_storms.xlsx’. This file is required to create the summary figures.</p>
 </dd></dl>
 
 </div>

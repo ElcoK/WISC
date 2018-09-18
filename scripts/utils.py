@@ -61,8 +61,6 @@ def create_folder_structure(data_path,country):
         os.makedirs(os.path.join(data_path,country))
     if not os.path.exists(os.path.join(data_path,country,'NUTS3_SHAPE')):
         os.makedirs(os.path.join(data_path,country,'NUTS3_SHAPE'))
-    if not os.path.exists(os.path.join(data_path,country,'NUTS3_LANDUSE')):        
-        os.makedirs(os.path.join(data_path,country,'NUTS3_LANDUSE'))        
     if not os.path.exists(os.path.join(data_path,country,'NUTS3_OSM')):        
         os.makedirs(os.path.join(data_path,country,'NUTS3_OSM')) 
     if not os.path.exists(os.path.join(data_path,country,'NUTS3_POLY')):        
@@ -86,6 +84,7 @@ def create_folder_structure(data_path,country):
         os.makedirs(os.path.join(data_path,'output_risk',country)) 
     if not os.path.exists(os.path.join(data_path,'output_sens',country)):        
         os.makedirs(os.path.join(data_path,'output_sens',country)) 
+
 def int2date(argdate: int):
     """
     If you have date as an integer, use this method to obtain a datetime.date object.

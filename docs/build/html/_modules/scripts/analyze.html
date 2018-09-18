@@ -93,7 +93,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyze.html">Analyze</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sensitivity.html">Sensitivity Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
@@ -184,6 +184,16 @@
 <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span><span class="n">cpu_count</span>
+
+<div class="viewcode-block" id="all_countries_risk"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.all_countries_risk">[docs]</a><span class="k">def</span> <span class="nf">all_countries_risk</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Function to estimate the risk for all countries consecutively</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># specify country</span>
+    <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;CZ&#39;</span><span class="p">,</span><span class="s1">&#39;CH&#39;</span><span class="p">,</span><span class="s1">&#39;EE&#39;</span><span class="p">,</span><span class="s1">&#39;LV&#39;</span><span class="p">,</span><span class="s1">&#39;LT&#39;</span><span class="p">,</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span><span class="s1">&#39;PL&#39;</span><span class="p">,</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span><span class="s1">&#39;FI&#39;</span><span class="p">,</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span><span class="s1">&#39;DE&#39;</span><span class="p">]</span> 
+    
+    <span class="k">for</span> <span class="n">country</span> <span class="ow">in</span> <span class="n">countries</span><span class="p">:</span>
+        <span class="n">losses</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">parallel</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">event_set</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> </div>
+
 
 <div class="viewcode-block" id="all_countries_losses"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.all_countries_losses">[docs]</a><span class="k">def</span> <span class="nf">all_countries_losses</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Function to estimate the losses for all countries consecutively</span>

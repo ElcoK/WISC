@@ -28,3 +28,8 @@ Estimate losses for all countries
 .. autofunction:: scripts.analyze.all_countries_losses
    :noindex:
    
+
+Estimate risk for all countries
+-----------------------------------------
+.. autofunction:: scripts.analyze.all_countries_risk
+   :noindex:

@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="WISC 0.1 documentation" href="index.html"/>
-        <link rel="next" title="Prepare" href="functions.html"/>
+        <link rel="next" title="Functions" href="functions.html"/>
         <link rel="prev" title="Getting started" href="readme.html"/> 
 
   
@@ -100,9 +100,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#create-folder-structure">Create folder structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#integer-to-date">Integer to date</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-integer-from-string">Get integer from string</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-dictionary-with-country-names-in-geofabrik">Create dictionary with country names in GeoFabrik</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-osm-file-from-geofabrik">Download OSM file from GeoFabrik</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="functions.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyze.html">Analyze</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sensitivity.html">Sensitivity Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
@@ -251,6 +253,34 @@ dateandtime.date – A date object which corresponds to the given value <cite>ar
 </dd></dl>
 
 </div>
+<div class="section" id="create-dictionary-with-country-names-in-geofabrik">
+<h2>Create dictionary with country names in GeoFabrik<a class="headerlink" href="#create-dictionary-with-country-names-in-geofabrik" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">country_dict_geofabrik</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#country_dict_geofabrik"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create a dictionary to convert ISO2 codes to Geofabrik country names</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>A lookup dictionary between ISO2 codes and Geofabrik country names</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="download-osm-file-from-geofabrik">
+<h2>Download OSM file from GeoFabrik<a class="headerlink" href="#download-osm-file-from-geofabrik" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descclassname">scripts.utils.</code><code class="descname">download_osm_file</code><span class="sig-paren">(</span><em>country</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/utils.html#download_osm_file"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Download OSM file from Geofabrik</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd>country {string} – ISO2 string code of country</dd>
+<dt>Returns:</dt>
+<dd>downloaded OSM file</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -263,7 +293,7 @@ dateandtime.date – A date object which corresponds to the given value <cite>ar
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="functions.html" class="btn btn-neutral float-right" title="Prepare" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="functions.html" class="btn btn-neutral float-right" title="Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="readme.html" class="btn btn-neutral" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

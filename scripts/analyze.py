@@ -22,6 +22,16 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from multiprocessing import Pool,cpu_count
 
+def all_countries_risk():
+    """Function to estimate the risk for all countries consecutively
+    """
+    # specify country
+    countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
+    
+    for country in countries:
+        losses(country, parallel = False, event_set = True) 
+
+
 def all_countries_losses():
     """Function to estimate the losses for all countries consecutively
     """

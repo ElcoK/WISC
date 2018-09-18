@@ -93,7 +93,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../readme.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Prepare</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyze.html">Analyze</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sensitivity.html">Sensitivity Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plotting.html">Plotting</a></li>
@@ -224,8 +224,6 @@
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_SHAPE&#39;</span><span class="p">)):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_SHAPE&#39;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_LANDUSE&#39;</span><span class="p">)):</span>        
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_LANDUSE&#39;</span><span class="p">))</span>        
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_OSM&#39;</span><span class="p">)):</span>        
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_OSM&#39;</span><span class="p">))</span> 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="s1">&#39;NUTS3_POLY&#39;</span><span class="p">)):</span>        
@@ -249,6 +247,7 @@
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_risk&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">))</span> 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">)):</span>        
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;output_sens&#39;</span><span class="p">,</span><span class="n">country</span><span class="p">))</span> </div>
+
 <div class="viewcode-block" id="int2date"><a class="viewcode-back" href="../../utils.html#scripts.utils.int2date">[docs]</a><span class="k">def</span> <span class="nf">int2date</span><span class="p">(</span><span class="n">argdate</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If you have date as an integer, use this method to obtain a datetime.date object.</span>
@@ -277,7 +276,7 @@
     
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ele</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">if</span> <span class="n">ele</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()))</span></div>
 
-<span class="k">def</span> <span class="nf">country_dict_geofabrik</span><span class="p">():</span>
+<div class="viewcode-block" id="country_dict_geofabrik"><a class="viewcode-back" href="../../utils.html#scripts.utils.country_dict_geofabrik">[docs]</a><span class="k">def</span> <span class="nf">country_dict_geofabrik</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Create a dictionary to convert ISO2 codes to Geofabrik country names</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
@@ -290,9 +289,9 @@
                            <span class="s1">&#39;austria&#39;</span><span class="p">,</span><span class="s1">&#39;belgium&#39;</span><span class="p">,</span><span class="s1">&#39;denmark&#39;</span><span class="p">,</span><span class="s1">&#39;ireland-and-northern-ireland&#39;</span><span class="p">,</span><span class="s1">&#39;netherlands&#39;</span><span class="p">,</span><span class="s1">&#39;sweden&#39;</span><span class="p">,</span>
                            <span class="s1">&#39;united-kingdom&#39;</span><span class="p">,</span><span class="s1">&#39;poland&#39;</span><span class="p">,</span><span class="s1">&#39;italy&#39;</span><span class="p">,</span><span class="s1">&#39;finland&#39;</span><span class="p">,</span><span class="s1">&#39;france&#39;</span><span class="p">,</span><span class="s1">&#39;germany&#39;</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">countries</span><span class="p">,</span><span class="n">countries_geofabrik</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">countries</span><span class="p">,</span><span class="n">countries_geofabrik</span><span class="p">))</span></div>
 
-<span class="k">def</span> <span class="nf">download_osm_file</span><span class="p">(</span><span class="n">country</span><span class="p">):</span>
+<div class="viewcode-block" id="download_osm_file"><a class="viewcode-back" href="../../utils.html#scripts.utils.download_osm_file">[docs]</a><span class="k">def</span> <span class="nf">download_osm_file</span><span class="p">(</span><span class="n">country</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Download OSM file from Geofabrik</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
@@ -310,7 +309,7 @@
     
     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://download.geofabrik.de/europe/</span><span class="si">{}</span><span class="s1">-latest.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lookup</span><span class="p">[</span><span class="n">country</span><span class="p">])</span>
     <span class="k">if</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.osm.pbf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">country</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">osm_path</span><span class="p">):</span>
-                <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">osm_path_in</span><span class="p">)</span>
+                <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">osm_path_in</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

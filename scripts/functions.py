@@ -25,9 +25,6 @@ from scripts.utils import load_config,get_num,int2date
 from sklearn import metrics
 from tqdm import tqdm
 
-def get_raster_value(centroid,out_image,out_transform):
-    return int(point_query(centroid,out_image,affine=out_transform,nodata=-9999,interpolate='nearest')[0] or 255)   
-
 def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
     """Get exposure data for single region 
     
@@ -124,52 +121,6 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     print ('Obtained all storm information for {}'.format(region))
 
     return gdf_table        
-
-def loss_calculation(storm,country,output_table,max_dam,curves,sample):
-    """Calculate the losses per storm
-    
-    Arguments:
-        storm {string} -- date of the storm
-        region {string} -- NUTS3 code of region to consider
-        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm
-        max_dam {numpy array} -- table with maximum damages per building type/land-use class
-        curves  {dataframe} -- fragility curves for the different building types
-        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation
-   
-    Returns:
-        GeoDataFrame including the losses for the storm
-    """   
-    
-    max_dam_country = np.asarray(max_dam[max_dam['CODE'].str.contains(country)].iloc[:,1:],dtype='int16')    
-
-    df_C2 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
-    df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
-    df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
-
-
-    df_C2[str(storm)+'_curve'] = df_C2[storm].map(curves['C2']) 
-    df_C3[str(storm)+'_curve'] = df_C3[storm].map(curves['C3'])
-    df_C4[str(storm)+'_curve'] = df_C4[storm].map(curves['C4']) 
- 
-    #specify shares for urban and nonurban        
-    RES_URB = sample[4]/100 
-    IND_URB = sample[3]/100   
-
-    RES_NONURB = 0.5
-    IND_NONURB = 0.5
-
-    # Use pandas where to fill new column for losses
-    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(0,12, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[0]/100), 0)
-    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(13,23, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[0]/100),df_C2['Loss'])
-
-    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(0,12, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[1]/100), 0)
-    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(13,23, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[1]/100),df_C3['Loss'])
-
-    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
-    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
-
-#        # and write output 
-    return  (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))        
 
 
 def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
@@ -296,19 +247,52 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     
     return(output_file)
 
-def storm_exposure(gdf_table):
+def loss_calculation(storm,country,output_table,max_dam,curves,sample):
+    """Calculate the losses per storm
     
-    data_path = load_config()['paths']['data']    
-    #==============================================================================
-    # Loop through storms
-    #==============================================================================
-    storm_list = get_storm_list(data_path)
-    for outrast_storm in storm_list:
-        print(outrast_storm)
-        storm_name = str(get_num(outrast_storm[-23:]))
-        gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')
+    Arguments:
+        storm {string} -- date of the storm
+        region {string} -- NUTS3 code of region to consider
+        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm
+        max_dam {numpy array} -- table with maximum damages per building type/land-use class
+        curves  {dataframe} -- fragility curves for the different building types
+        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation
+   
+    Returns:
+        GeoDataFrame including the losses for the storm
+    """   
+    
+    max_dam_country = np.asarray(max_dam[max_dam['CODE'].str.contains(country)].iloc[:,1:],dtype='int16')    
 
-    return gdf_table
+    df_C2 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+    df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+    df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+
+
+    df_C2[str(storm)+'_curve'] = df_C2[storm].map(curves['C2']) 
+    df_C3[str(storm)+'_curve'] = df_C3[storm].map(curves['C3'])
+    df_C4[str(storm)+'_curve'] = df_C4[storm].map(curves['C4']) 
+ 
+    #specify shares for urban and nonurban        
+    RES_URB = sample[4]/100 
+    IND_URB = sample[3]/100   
+
+    RES_NONURB = 0.5
+    IND_NONURB = 0.5
+
+    # Use pandas where to fill new column for losses
+    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(0,12, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[0]/100), 0)
+    df_C2['Loss'] = np.where(df_C2['CLC_2012'].between(13,23, inclusive=True), (df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C2['AREA_m2']*df_C2[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[0]/100),df_C2['Loss'])
+
+    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(0,12, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[1]/100), 0)
+    df_C3['Loss'] = np.where(df_C3['CLC_2012'].between(13,23, inclusive=True), (df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C3['AREA_m2']*df_C3[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[1]/100),df_C3['Loss'])
+
+    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
+    df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
+
+#        # and write output 
+    return  (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))        
+
 
 def get_storm_data(storm_path):
     with rio.open(storm_path) as src:    
@@ -491,7 +475,7 @@ def fetch_buildings(data_path,country,region='',regional=False):
         geodataframe with all buildings
      
     """
-    data = load_osm_data(data_path,country,region='',regional=False)
+    data = load_osm_data(data_path,country,region,regional=regional)
     
     sql_lyr = data.ExecuteSQL("SELECT osm_id,building,amenity from multipolygons where building is not null")
     
@@ -655,6 +639,17 @@ def load_sens_analysis_storms(storm_name_list=['19991203','19900125','20090124',
             for storm in storm_name_list:
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
+
+def get_raster_value(centroid,out_image,out_transform):
+    """Small function to obtain raster value from rastermap, using point_query.
+    
+    Arguments:
+        centroid {geometry} : 
+        out_image {numpy array} : numpy array of grid
+        out_transform {Affine} : georeference of numpy array
+    """
+    return int(point_query(centroid,out_image,affine=out_transform,nodata=-9999,interpolate='nearest')[0] or 255)   
+
                     
 def summary_statistics_losses():
     """
