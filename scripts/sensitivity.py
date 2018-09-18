@@ -52,7 +52,7 @@ def calculate(country,parallel=True,save=True):
     samples,storm_list = prepare_sens_analysis()
 
     #get list of regions for which we have poly files (should be all) 
-    regions = os.listdir(os.path.join(data_path,country,'NUTS2_POLY'))
+    regions = os.listdir(os.path.join(data_path,country,'NUTS3_POLY'))
     regions = [x.split('.')[0] for x in regions]
     
     if parallel == True:
@@ -65,8 +65,7 @@ def calculate(country,parallel=True,save=True):
     else:
         country_table = []
         for region in regions:
-            country_table.append(region_sens_analysis(region,samples,storms,save))
-    
+            country_table.append(region_sens_analysis(region,samples,storm_list,save))
     return country_table            
                 
 def prepare_sens_analysis(storm_name_list=[]):

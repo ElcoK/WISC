@@ -217,16 +217,16 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
 
     # select storms to assess
     if len(sens_analysis_storms) == 0:
-        storm_name_list = ['19991203','19900125','20090124','20070118','19991226']
+        sens_analysis_storms = ['19991203','19900125','20090124','20070118','19991226']
 
     storm_list = []
     for root, dirs, files in os.walk(os.path.join(data_path,'STORMS')):
         for file in files:
-            for storm in storm_name_list:
+            for storm in sens_analysis_storms:
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
 
-    all_combis = list(product(samples,storm_name_list))
+    all_combis = list(product(samples,sens_analysis_storms))
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -235,10 +235,10 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     curves = load_curves(data_path)
 
     # get exposure table   
-    output_table = region_exposure(region,include_storms=True,sens_analysis_storms=storm_name_list)
+    output_table = region_exposure(region,include_storms=True,sens_analysis_storms=sens_analysis_storms)
     
     # calculate losses for all combinations
-    output_file = pd.DataFrame(index=list(range(len(samples))),columns=storm_name_list)
+    output_file = pd.DataFrame(index=list(range(len(samples))),columns=sens_analysis_storms)
     for iter_,(sample,storm) in enumerate(all_combis):
         output_file.loc[iter_,storm] = list(loss_calculation(storm,country,output_table,max_dam,curves,sample).sum())[0]
     
