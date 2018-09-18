@@ -195,7 +195,18 @@
 <span class="c1">#matplotlib.rcParams[&#39;ytick.labelsize&#39;] = 12.</span>
 
 <div class="viewcode-block" id="calculate"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.calculate">[docs]</a><span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="n">country</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Base function to perform the sensitivity analysis for a country</span>
+    <span class="sd">&quot;&quot;&quot; Base function to perform the sensitivity analysis for a country.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+
+<span class="sd">        *parallel* (bool) -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: **True**).</span>
+
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**).</span>
+<span class="sd">            </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *dataframe* -- Pandas dataframe with all outcomes per parameter combination.</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># set data path    </span>
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
@@ -232,9 +243,17 @@
     <span class="k">return</span> <span class="n">country_table</span>            </div>
                 
 <div class="viewcode-block" id="prepare_sens_analysis"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.prepare_sens_analysis">[docs]</a><span class="k">def</span> <span class="nf">prepare_sens_analysis</span><span class="p">(</span><span class="n">storm_name_list</span><span class="o">=</span><span class="p">[]):</span>
-    <span class="sd">&quot;&quot;&quot; Function to prepare the sensitivity analysis for a country</span>
+    <span class="sd">&quot;&quot;&quot; Function to prepare the sensitivity analysis for a country.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        *storm_name_list* (list) -- list of storms to include in sensitivity analysis. If kept empty, default storms will be used.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *param_values* (list) -- list of 5000 combinations of parameter values to be used in sensitivity analysis.</span>
+<span class="sd">        </span>
+<span class="sd">        *storm_name_list* (list) -- list of storms to include in sensitivity analysis.</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
     
     <span class="c1"># set parameters for sensitivity analysis</span>
     <span class="n">problem</span> <span class="o">=</span> <span class="p">{</span>
@@ -254,23 +273,15 @@
         <span class="n">inb</span> <span class="o">=</span> <span class="p">(</span><span class="n">rescale</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">rescale</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">param_values</span><span class="p">[</span><span class="n">i</span><span class="p">,:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">inb</span>
     
-   
     <span class="c1"># select storms to assess</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">storm_name_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">storm_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]</span>
-
-    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
-                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
                     
     <span class="k">return</span> <span class="n">param_values</span><span class="p">,</span><span class="n">storm_name_list</span></div>
 
 
 <div class="viewcode-block" id="read_outcomes_sens_analysis"><a class="viewcode-back" href="../../sensitivity.html#scripts.sensitivity.read_outcomes_sens_analysis">[docs]</a><span class="k">def</span> <span class="nf">read_outcomes_sens_analysis</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Function to write the output of the sensitivity analysis to figures</span>
+    <span class="sd">&quot;&quot;&quot; Function to write the output of the sensitivity analysis to figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="c1"># load some basics</span>
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>

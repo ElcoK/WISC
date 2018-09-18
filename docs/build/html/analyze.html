@@ -176,16 +176,16 @@
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.analyze.</code><code class="descname">exposure</code><span class="sig-paren">(</span><em>country</em>, <em>include_storms=True</em>, <em>parallel=True</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#exposure"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creation of exposure table of the specified country</p>
+<dd><p>Creation of exposure table of the specified country.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>country {string} – country to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>include_storms {bool} – if set to False, it will only return a list of buildings and their characteristics (default: {True})
-parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
+<dd><p class="first"><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>include_storms</em> (bool) – if set to False, it will only return a list of buildings and their characteristics (default: <strong>True</strong>).</p>
+<p><em>parallel</em> (bool) – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: <strong>True</strong>).</p>
+<p class="last"><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>).</p>
+</dd>
 <dt>Returns:</dt>
-<dd>GeoDataframe with all buildings of the country and potential exposure to wind</dd>
+<dd><em>GeoDataframe</em> – Geopandas dataframe with all buildings of the country and potential exposure to wind</dd>
 </dl>
 </dd></dl>
 
@@ -198,13 +198,13 @@ save {bool} – boolean to decide whether you want to save the output to a csv f
 <dd><p>Creation of exposure table of the specified country</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>country {string} – country to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>parallel {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-event_set {bool} – if set to True, we will calculate the losses for the event set instead of the historical storms (default: {True})
-save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
+<dd><p class="first"><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>parallel</em> (bool) – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: <strong>True</strong>).</p>
+<p><em>event_set</em> (bool) – if set to True, we will calculate the losses for the event set instead of the historical storms (default: <strong>True</strong>).</p>
+<p class="last"><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>).</p>
+</dd>
 <dt>Returns:</dt>
-<dd>Geodataframe with all buildings of the country and the losses to wind storms</dd>
+<dd><em>GeoDataframe</em> – Geopandas dataframe with all buildings of the country and their <strong>losses</strong> for each wind storm.</dd>
 </dl>
 </dd></dl>
 
@@ -217,8 +217,11 @@ save {bool} – boolean to decide whether you want to save the output to a csv f
 <dd><p>Estimate risk based on event set</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>country {string} – country to consider.
-path_to_eventset {string} – the location of the event set in the data directory</dd>
+<dd><p class="first"><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>path_to_eventset</em> (string) – the location of the event set in the data directory</p>
+<p><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>).</p>
+<p class="last"><em>parallel</em> (bool) – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: <strong>True</strong>).</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -228,7 +231,7 @@ path_to_eventset {string} – the location of the event set in the data director
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.analyze.</code><code class="descname">all_countries_exposure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#all_countries_exposure"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Function to estimate the exposure for all countries consecutively</p>
+<dd><p>Function to estimate the exposure for all countries consecutively.</p>
 </dd></dl>
 
 </div>
@@ -237,7 +240,7 @@ path_to_eventset {string} – the location of the event set in the data director
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.analyze.</code><code class="descname">all_countries_losses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#all_countries_losses"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Function to estimate the losses for all countries consecutively</p>
+<dd><p>Function to estimate the losses for all countries consecutively.</p>
 </dd></dl>
 
 </div>
@@ -246,7 +249,7 @@ path_to_eventset {string} – the location of the event set in the data director
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.analyze.</code><code class="descname">all_countries_risk</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/analyze.html#all_countries_risk"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Function to estimate the risk for all countries consecutively</p>
+<dd><p>Function to estimate the risk for all countries consecutively.</p>
 </dd></dl>
 
 </div>

@@ -32,15 +32,17 @@ cc = coco.CountryConverter()
 #matplotlib.rcParams['ytick.labelsize'] = 12.
 
 def calculate(country,parallel=True,save=True):
-    """ Base function to perform the sensitivity analysis for a country
+    """ Base function to perform the sensitivity analysis for a country.
     
     Arguments:
-        country {string} -- country to consider.
-        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})
-        
+        *country* (string) -- ISO2 code of country to consider.
+
+        *parallel* (bool) -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: **True**).
+
+        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**).
+            
     Returns:
-        Pandas dataframe with all outcomes per parameter combination
+        *dataframe* -- Pandas dataframe with all outcomes per parameter combination.
         
     """
     # set data path    
@@ -78,14 +80,15 @@ def calculate(country,parallel=True,save=True):
     return country_table            
                 
 def prepare_sens_analysis(storm_name_list=[]):
-    """ Function to prepare the sensitivity analysis for a country
+    """ Function to prepare the sensitivity analysis for a country.
     
     Arguments:
-        storm_name_list {list} -- list of storms to include in sensitivity analysis. If kept empty, default storms will be used.
+        *storm_name_list* (list) -- list of storms to include in sensitivity analysis. If kept empty, default storms will be used.
     
     Returns:
-        param_values {list} -- list of 5000 combinations of parameter values to be used in sensitivity analysis
-        storm_name_list {list} -- list of storms to include in sensitivity analysis
+        *param_values* (list) -- list of 5000 combinations of parameter values to be used in sensitivity analysis.
+        
+        *storm_name_list* (list) -- list of storms to include in sensitivity analysis.
     
     """    
     
@@ -115,7 +118,7 @@ def prepare_sens_analysis(storm_name_list=[]):
 
 
 def read_outcomes_sens_analysis():
-    """ Function to write the output of the sensitivity analysis to figures
+    """ Function to write the output of the sensitivity analysis to figures.
     """      
     # load some basics
     data_path = load_config()['paths']['data']

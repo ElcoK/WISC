@@ -20,10 +20,10 @@ def load_config():
     return config
 
 def clean_dir(dirpath):
-    """This function can be used to fully clear a directory
+    """This function can be used to fully clear a directory.
     
     Arguments:
-        dirpath {string} -- path to directory to be cleared from files
+        *dirpath* (string) -- path to directory to be cleared from files
     """
     
     for filename in os.listdir(dirpath):
@@ -35,24 +35,23 @@ def clean_dir(dirpath):
             
 def remove_files(dirpath,startname):
     """This function can be used to delete specific files from a directory. In 
-    general this function is used to clean country files from the 'calc' directory
+    general this function is used to clean country files from the 'calc' directory.
     
     Arguments:
-        dirpath {string} -- path to directory in which the files should be removed
-        startname {string} -- the substring to be searched for in the files
+        *dirpath* (string) -- path to directory in which the files should be removed
+        
+        *startname* (string) -- the substring to be searched for in the files
     """
     for fname in os.listdir(dirpath):
         if fname.startswith(startname):
             os.remove(os.path.join(dirpath, fname))
 
 def create_folder_structure(data_path,country):
-    """Create the directory structure for the output
+    """Create the directory structure for the output.
     
     Arguments:
-        base_path {string} -- path to directory where folder structure should be created 
-    
-    Keyword Arguments:
-        regionalized {bool} -- specify whether also the folders for a regionalized analyse should be created (default: {True})
+        *base_path (string) -- path to directory where folder structure should be created.
+        *regionalized* (bool) -- specify whether also the folders for a regionalized analyse should be created (default: **True**)
     """
     
     data_path = load_config()['paths']['data']
@@ -90,10 +89,10 @@ def int2date(argdate: int):
     If you have date as an integer, use this method to obtain a datetime.date object.
 
     Arguments:
-    argdate {int} -- Date as a regular integer value (example: 20160618)
+        *argdate* (int) -- Date as a regular integer value (example: **20160618**)
 
     Returns:
-    dateandtime.date -- A date object which corresponds to the given value `argdate`.
+        *dateandtime.date* -- A date object which corresponds to the given value **argdate**.
     """
     year = int(argdate / 10000)
     month = int((argdate % 10000) / 100)
@@ -102,22 +101,22 @@ def int2date(argdate: int):
     return date(year, month, day)
 
 def get_num(x):
-    """Grab all integers from string
+    """Grab all integers from string.
     
     Arguments:
-        x {[type]} -- [description]
+        *x* (string) -- string containing integers
         
     Returns:
-        Integer created from string
+        *integer* -- created from string
     """
     
     return int(''.join(ele for ele in x if ele.isdigit()))
 
 def country_dict_geofabrik():
-    """ Create a dictionary to convert ISO2 codes to Geofabrik country names
+    """ Create a dictionary to convert ISO2 codes to Geofabrik country names.
     
     Returns:
-        A lookup dictionary between ISO2 codes and Geofabrik country names
+        *dictionary* -- lookup between ISO2 codes and Geofabrik country names.
     
     """
    
@@ -129,13 +128,13 @@ def country_dict_geofabrik():
     return dict(zip(countries,countries_geofabrik))
 
 def download_osm_file(country):
-    """ Download OSM file from Geofabrik
+    """ Download OSM file from Geofabrik.
     
     Arguments:
-        country {string} -- ISO2 string code of country
+        *country* (string) -- ISO2 string code of country
         
     Returns:
-        downloaded OSM file
+        *downloaded OSM file*
     """
     
     lookup = country_dict_geofabrik()

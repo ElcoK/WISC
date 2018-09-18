@@ -30,10 +30,10 @@ def loss_per_country(figure_output_path='test_country.png'):
     '''This function is used to plot the total losses per year per country.
     
     Arguments:
-        figure_output_path {string} -- path to location where you want to save the figure
+        *figure_output_path* (string) -- path to location where you want to save the figure
         
     Returns:
-        A saved figure
+        *A saved figure*
     '''
 
     data_path = load_config()['paths']['data']
@@ -71,10 +71,10 @@ def loss_per_sector(figure_output_path='test_sector.png'):
     '''This function is used to plot the total losses for the following sectors: Residential,Industrial/Commercial,Transport,Other uses,Agriculture.
     
     Arguments:
-        figure_output_path {string} -- path to location where you want to save the figure
+        *figure_output_path* (string) -- path to location where you want to save the figure
         
     Returns:
-        A saved figure
+        *A saved figure*
     '''
 
     data_path = load_config()['paths']['data']
@@ -127,10 +127,10 @@ def risk_map(figure_output_path='test_risk_map.png'):
     """This function is used to create a map with the total risk per region.
     
     Arguments:
-        figure_output_path {string} -- path to location where you want to save the figure
+        *figure_output_path* (string) -- path to location where you want to save the figure
         
     Returns:
-        A saved figure
+        *A saved figure*
     """
 
     data_path = load_config()['paths']['data']

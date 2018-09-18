@@ -183,10 +183,10 @@
     <span class="k">return</span> <span class="n">config</span></div>
 
 <div class="viewcode-block" id="clean_dir"><a class="viewcode-back" href="../../utils.html#scripts.utils.clean_dir">[docs]</a><span class="k">def</span> <span class="nf">clean_dir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This function can be used to fully clear a directory</span>
+    <span class="sd">&quot;&quot;&quot;This function can be used to fully clear a directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        dirpath {string} -- path to directory to be cleared from files</span>
+<span class="sd">        *dirpath* (string) -- path to directory to be cleared from files</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
@@ -198,24 +198,23 @@
             
 <div class="viewcode-block" id="remove_files"><a class="viewcode-back" href="../../utils.html#scripts.utils.remove_files">[docs]</a><span class="k">def</span> <span class="nf">remove_files</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span><span class="n">startname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This function can be used to delete specific files from a directory. In </span>
-<span class="sd">    general this function is used to clean country files from the &#39;calc&#39; directory</span>
+<span class="sd">    general this function is used to clean country files from the &#39;calc&#39; directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        dirpath {string} -- path to directory in which the files should be removed</span>
-<span class="sd">        startname {string} -- the substring to be searched for in the files</span>
+<span class="sd">        *dirpath* (string) -- path to directory in which the files should be removed</span>
+<span class="sd">        </span>
+<span class="sd">        *startname* (string) -- the substring to be searched for in the files</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirpath</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">startname</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="create_folder_structure"><a class="viewcode-back" href="../../utils.html#scripts.utils.create_folder_structure">[docs]</a><span class="k">def</span> <span class="nf">create_folder_structure</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create the directory structure for the output</span>
+    <span class="sd">&quot;&quot;&quot;Create the directory structure for the output.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        base_path {string} -- path to directory where folder structure should be created </span>
-<span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        regionalized {bool} -- specify whether also the folders for a regionalized analyse should be created (default: {True})</span>
+<span class="sd">        *base_path (string) -- path to directory where folder structure should be created.</span>
+<span class="sd">        *regionalized* (bool) -- specify whether also the folders for a regionalized analyse should be created (default: **True**)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
@@ -253,10 +252,10 @@
 <span class="sd">    If you have date as an integer, use this method to obtain a datetime.date object.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    argdate {int} -- Date as a regular integer value (example: 20160618)</span>
+<span class="sd">        *argdate* (int) -- Date as a regular integer value (example: **20160618**)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    dateandtime.date -- A date object which corresponds to the given value `argdate`.</span>
+<span class="sd">        *dateandtime.date* -- A date object which corresponds to the given value **argdate**.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">argdate</span> <span class="o">/</span> <span class="mi">10000</span><span class="p">)</span>
     <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">argdate</span> <span class="o">%</span> <span class="mi">10000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
@@ -265,22 +264,22 @@
     <span class="k">return</span> <span class="n">date</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="get_num"><a class="viewcode-back" href="../../utils.html#scripts.utils.get_num">[docs]</a><span class="k">def</span> <span class="nf">get_num</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Grab all integers from string</span>
+    <span class="sd">&quot;&quot;&quot;Grab all integers from string.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        x {[type]} -- [description]</span>
+<span class="sd">        *x* (string) -- string containing integers</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Integer created from string</span>
+<span class="sd">        *integer* -- created from string</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ele</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">if</span> <span class="n">ele</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()))</span></div>
 
 <div class="viewcode-block" id="country_dict_geofabrik"><a class="viewcode-back" href="../../utils.html#scripts.utils.country_dict_geofabrik">[docs]</a><span class="k">def</span> <span class="nf">country_dict_geofabrik</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Create a dictionary to convert ISO2 codes to Geofabrik country names</span>
+    <span class="sd">&quot;&quot;&quot; Create a dictionary to convert ISO2 codes to Geofabrik country names.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        A lookup dictionary between ISO2 codes and Geofabrik country names</span>
+<span class="sd">        *dictionary* -- lookup between ISO2 codes and Geofabrik country names.</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
    
@@ -292,13 +291,13 @@
     <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">countries</span><span class="p">,</span><span class="n">countries_geofabrik</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="download_osm_file"><a class="viewcode-back" href="../../utils.html#scripts.utils.download_osm_file">[docs]</a><span class="k">def</span> <span class="nf">download_osm_file</span><span class="p">(</span><span class="n">country</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Download OSM file from Geofabrik</span>
+    <span class="sd">&quot;&quot;&quot; Download OSM file from Geofabrik.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        country {string} -- ISO2 string code of country</span>
+<span class="sd">        *country* (string) -- ISO2 string code of country</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        downloaded OSM file</span>
+<span class="sd">        *downloaded OSM file*</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">lookup</span> <span class="o">=</span> <span class="n">country_dict_geofabrik</span><span class="p">()</span>

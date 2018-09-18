@@ -26,16 +26,21 @@ from sklearn import metrics
 from tqdm import tqdm
 
 def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
-    """Get exposure data for single region 
+    """Create a GeoDataframe with exposure and hazard information for each building in the specified region.
     
     Arguments:
-        region {string} -- NUTS3 code of region to consider.
-        include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})
-        event_set {bool} -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})
-        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})
+        *region* (string) -- NUTS3 code of region to consider.
+        
+        *include_storms* (bool) -- if set to False, it will only return a list of buildings and their characteristics (default: **True**)
+        
+        *event_set* (bool) -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: **True**)
+        
+        *sens_analysis_storms* (list) -- if empty, it will fill with default list
+        
+        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**)
    
     Returns:
-        GeoDataFrame with the exposure
+        *GeoDataFrame* with all **hazard** and **exposure** values.
     """    
     country = region[:2]
     
@@ -126,17 +131,17 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
 
 
 def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
-    """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
+    """Estimation of the losses for all buildings in a region for a pre-defined list of storms.
     
     Arguments:
-        region {string} -- nuts code of region to consider.
-    
-    Keyword Arguments:
-        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list
+        *region* (string) -- nuts code of region to consider.
+        
+        *storm_event_set* (bool) -- calculates all regions within a country parallel. Set to **False** if you have little capacity on the machine (default: **True**).
+        
+        *sample* (tuple) -- tuple of parameter values. This is a dummy placeholder, should be filled with either **load_sample(country)** values or **sens_analysis_param_list**.
     
     Returns:
-        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm
+        *pandas Dataframe* -- pandas dataframe with all buildings of the region and their **losses** for each wind storm.
 
     """ 
     data_path = load_config()['paths']['data']    
@@ -199,17 +204,19 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
     
 
 def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
-    """"Estimation of the losses for all buildings in a country to the pre-defined list of storms
+    """Perform a sensitivity analysis for the specified region, based on a predefined list of storms. 
     
     Arguments:
-        region {string} -- nuts code of region to consider.
+        *region* (string) -- nuts code of region to consider.
+
+        *samples* (list) -- list of tuples, where each tuple is a **unique** set of parameter values.
     
-    Keyword Arguments:
-        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list
-    
+        *sens_analysis_storms* (list) -- if empty, it will fill with default list
+
+        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**)
+
     Returns:
-        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm
+        *list* -- list with the total losses per storm for all parameter combinations
 
     """ 
     
@@ -245,18 +252,23 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     return(output_file)
 
 def loss_calculation(storm,country,output_table,max_dam,curves,sample):
-    """Calculate the losses per storm
+    """Calculate the losses per storm.
     
     Arguments:
-        storm {string} -- date of the storm
-        region {string} -- NUTS3 code of region to consider
-        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm
-        max_dam {numpy array} -- table with maximum damages per building type/land-use class
-        curves  {dataframe} -- fragility curves for the different building types
-        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation
+        *storm* (string) -- date of the storm.
+        
+        *region* (string) -- NUTS3 code of region to consider.
+        
+        *output_table* (GeoDataFrame) -- GeoDataFrame with all buildings and the wind speed values for each storm.
+        
+        *max_dam* (numpy array) -- table with maximum damages per building type/land-use class.
+        
+        *curves*  (pandas dataframe) -- fragility curves for the different building types.
+        
+        *sample* (list) -- ratios of different curves used in this study. See the **Sensitivity analysis documentation** for an explanation.
    
     Returns:
-        GeoDataFrame including the losses for the storm
+        *pandas Series* -- losses to all buildings for the specified storm
     """   
     
     max_dam_country = np.asarray(max_dam[max_dam['CODE'].str.contains(country)].iloc[:,1:],dtype='int16')    
@@ -295,7 +307,7 @@ def get_storm_data(storm_path):
     """  Obtain raster grid of the storm with rasterio
     
     Arguments:
-        storm_path {string}
+        *storm_path* (string) -- path to location of storm
     
     """
     with rio.open(storm_path) as src:    
@@ -309,11 +321,11 @@ def extract_buildings(area,country,NUTS3=True):
     """Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile
     
     Arguments:
-        area {string} -- name of area to clip
-        country {string} -- ISO2 code of country to consider.
+        *area* (string) -- name of area to clip
+        
+        *country* (string) -- ISO2 code of country to consider.
     
-    Keyword Arguments:
-        NUTS3 {bool} -- specify whether it will be a clip of NUTS3 region or the whole country (default: {True})
+        *NUTS3* (bool) -- specify whether it will be a clip of NUTS3 region or the whole country (default: **True**)
     
     """
     # get data path
@@ -333,12 +345,13 @@ def convert_buildings(area,country):
     """Converts the coordinate system from EPSG:4326 to EPSG:3035.
 
     Arguments:
-        area {string} -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system 
+        *area* (string) -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system.
 
-        country {string} -- ISO2 code of country to consider.
+        *country* (string) -- ISO2 code of country to consider.
 
     Returns:
-        geodataframe -- Geopandas dataframe with all buildings of the selected area
+        *GeoDataframe* -- Geopandas dataframe with all buildings of the selected area
+        
     """
     # get data path
     data_path = load_config()['paths']['data']
@@ -354,13 +367,13 @@ def convert_buildings(area,country):
     return input_
     
 def get_storm_list(data_path):
-    """Small function to create a list of with path strings to all storms
+    """Small function to create a list of with path strings to all storms.
     
     Arguments:
-        data_path {string} -- string of data path where all data is located.
+        *data_path* (string) -- string of data path where all data is located.
 
     Returns:
-        list -- list with the path strings of all storms
+        *list* -- list with the path strings of all storms
     """
    
     storm_list = []
@@ -376,6 +389,14 @@ def get_storm_list(data_path):
     return storm_list
 
 def get_event_storm_list(data_path):
+    """Small function to create a list of with path strings to all storms in the event set.
+    
+    Arguments:
+        *data_path* (string) -- string of data path where all data is located.
+
+    Returns:
+        *list* -- list with the path strings of all storms    
+    """
     storm_list = []
     for root, dirs, files in os.walk(os.path.join(data_path,'event_set')):
         for file in files:
@@ -392,10 +413,10 @@ def load_max_dam(data_path):
     """Small function to load the excel with maximum damages.
     
     Arguments:
-        data_path {string} -- string of data path where all data is located.
+        *data_path* (string) -- string of data path where all data is located.
 
     Returns:
-        dataframe -- pandas dataframe with maximum damages per landuse
+        *dataframe* -- pandas dataframe with maximum damages per landuse.
     """
 
     return pd.read_excel(os.path.join(data_path,'input_data','max_dam2.xlsx'))
@@ -405,10 +426,10 @@ def load_curves(data_path):
     """Small function to load the csv file with the different fragility curves.
     
     Arguments:
-        data_path {string} -- string of data path where all data is located.
+        *data_path* (string) -- string of data path where all data is located.
 
     Returns:
-        dataframe -- pandas dataframe with fragility curves
+        *dataframe* -- pandas dataframe with fragility curves
     """
 
     return pd.read_csv(os.path.join(data_path,'input_data','CURVES.csv'),index_col=[0],names=['C1','C2','C3','C4','C5','C6'])
@@ -418,12 +439,12 @@ def load_sample(country):
     """Will load the ratio of each curve and landuse to be used.
     
     Arguments:
-        country {string} -- ISO2 code of country to consider.
+        *country* (string) -- ISO2 code of country to consider.
 
     Returns:
-        tuple -- tuple of ratios for the selected country
+        *tuple* -- tuple with ratios for the selected country. See the **documentation** for an explanation.
         
-        ['c2', 'c3', 'c4','lu1','lu2']
+        **['c2', 'c3', 'c4','lu1','lu2']**
         
     """
 
@@ -445,13 +466,16 @@ def load_osm_data(data_path,country,region='',regional=False):
     """This function loads the OSM file for the country
     
     Arguments:
-        data_path
-        country {string} -- ISO2 code of country to consider.
-        region {string} -- NUTS3 code of region to consider.
-        regional {boolean} -- set to False by default
+        *data_path* (string) -- string of data path where all data is located.
+        
+        *country* (string) -- ISO2 code of country to consider.
+        
+        *region* (string) -- NUTS3 code of region to consider.
+        
+        *regional* (boolean) -- Boolean to decide whether this should be done on a regional level or for the entire country (default: **False**). 
 
     Returns:
-        opened OSM file to use in the fetch_roads function
+        opened OSM file to use in the fetch_roads function.
     
     """
     
@@ -469,13 +493,16 @@ def fetch_buildings(data_path,country,region='',regional=False):
     This function directly reads the building data from osm, instead of first converting it to a shapefile
     
     Arguments:
-        data_path
-        country {string} -- ISO2 code of country to consider.
-        region {string} -- NUTS3 code of region to consider.
-        regional {boolean} -- set to False by default
+        *data_path* (string) -- string of data path where all data is located.
+        
+        *country* (string) -- ISO2 code of country to consider.
+        
+        *region* (string) -- NUTS3 code of region to consider.
+        
+        *regional* (boolean) -- Boolean to decide whether this should be done on a regional level or for the entire country (default: **False**). 
      
     Returns:
-        geodataframe with all buildings
+        *Geodataframe* -- Geopandas dataframe with all buildings in the specified **region** or **country**.
      
     """
     data = load_osm_data(data_path,country,region,regional=regional)
@@ -507,12 +534,12 @@ def poly_files(data_path,country):
     This function is adapted from the OSMPoly function in QGIS.
     
     Arguments:
-        data_path: base path to location of all files.
+        *data_path* (string) -- string of data path where all data is located.
         
-        country: string name of country ISO2.
+        *country* (string) -- ISO2 code of country to consider.
    
     Returns:
-        .poly file for each NUTS3 in a new dir in the working directory.
+        *.poly file* -- .poly file for each NUTS3 in a new directory in the working directory of the country.
     """     
    
 # =============================================================================
@@ -585,12 +612,18 @@ def poly_files(data_path,country):
         f.close()
 
 def clip_landuse(data_path,country,region,outrast_lu):
-    """Clip the landuse from the European Corine Land Cover (CLC) map to the considered country
+    """Clip the landuse from the European Corine Land Cover (CLC) map to the considered country.
     
     Arguments:
-        data_path {string} -- string of data path where all data is located.
-        country {string} -- ISO2 code of country to consider.
-        outrast_lu {string} -- string path to location of Corine Land Cover dataset 
+        *data_path* (string) -- string of data path where all data is located.
+        
+        *country* (string) -- ISO2 code of country to consider.
+        
+        *outrast_lu* (string) -- string path to location of Corine Land Cover dataset 
+        
+    Returns:
+        *raster* (geotiff) -- returns a raster file with only the landuse of the clipped **region** or **country**.
+        
     """
     
     inraster = os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')
@@ -602,6 +635,7 @@ def clip_landuse(data_path,country,region,outrast_lu):
 
 def clip_osm(data_path,osm_path,area_poly,area_pbf):
     """ Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. 
+    
     This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.
     
     This function uses the osmconvert tool, which can be found at http://wiki.openstreetmap.org/wiki/Osmconvert. 
@@ -609,14 +643,15 @@ def clip_osm(data_path,osm_path,area_poly,area_pbf):
     Either add the directory where this executable is located to your environmental variables or just put it in the 'scripts' directory.
     
     Arguments:
-        osm_path: path string to the osm.pbf file of the continent associated with the country.
+        *osm_path* (string) -- path string to the osm.pbf file of the continent associated with the country.
         
-        area_poly: path string to the .poly file, made through the 'create_poly_files' function.
+        *area_pol* (string) -- path string to the .poly file, made through the 'create_poly_files' function.
         
-        area_pbf: path string indicating the final output dir and output name of the new .osm.pbf file.
+        *area_pbf* (string) -- path string indicating the final output dir and output name of the new .osm.pbf file.
         
     Returns:
         a clipped .osm.pbf file.
+        
     """ 
 
     osm_convert_path = os.path.join(data_path,'osmconvert','osmconvert64')
@@ -632,7 +667,11 @@ def load_sens_analysis_storms(storm_name_list=['19991203','19900125','20090124',
     This file load the storms used to perform the sensitivity analysis. 
     
     Arguments:
-        sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar 
+        *storm_name_list* (list) -- list of storms to include in the sensitivity analysis. The default storms are **Anatol**, **Daria**, **Klaus**, **Kyrill** and **Lothar**.
+    
+    Returns:
+        *storm_list* (list) -- same list of storms but now with full paths to location in directory.
+    
     """
     data_path = load_config()['paths']['data']
 
@@ -648,12 +687,14 @@ def get_raster_value(centroid,out_image,out_transform):
     """Small function to obtain raster value from rastermap, using point_query.
     
     Arguments:
-        centroid {geometry} : shapely geometry of centroid of the building
-        out_image {numpy array} : numpy array of grid
-        out_transform {Affine} : georeference of numpy array
+        *centroid* (shapely geometry) -- shapely geometry of centroid of the building.
+        
+        *out_image* (numpy array) -- numpy array of grid.
+        
+        *out_transform* (Affine) -- georeference of numpy array.
         
     Returns:
-        raster value corresponding to location of centroid
+        *integer* -- raster value corresponding to location of centroid
     """
     return int(point_query(centroid,out_image,affine=out_transform,nodata=-9999,interpolate='nearest')[0] or 255)   
 
@@ -663,7 +704,7 @@ def summary_statistics_losses():
     This function creates the file 'output_storms.xlsx'. This file is required to create the summary figures.
     
     Returns:
-        output_storms.xlsx {excel file} -- Excel file with summary outcomes
+        *output_storms.xlsx* (excel file) -- Excel file with summary outcomes
     """
     
     data_path = load_config()['paths']['data']

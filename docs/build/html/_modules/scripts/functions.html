@@ -189,16 +189,21 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
 
 <div class="viewcode-block" id="region_exposure"><a class="viewcode-back" href="../../functions.html#scripts.functions.region_exposure">[docs]</a><span class="k">def</span> <span class="nf">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">event_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="p">[],</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get exposure data for single region </span>
+    <span class="sd">&quot;&quot;&quot;Create a GeoDataframe with exposure and hazard information for each building in the specified region.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
-<span class="sd">        include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})</span>
-<span class="sd">        event_set {bool} -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})</span>
-<span class="sd">        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})</span>
+<span class="sd">        *region* (string) -- NUTS3 code of region to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *include_storms* (bool) -- if set to False, it will only return a list of buildings and their characteristics (default: **True**)</span>
+<span class="sd">        </span>
+<span class="sd">        *event_set* (bool) -- if set to True, we will calculate the exposure for the event set instead of the historical storms (default: **True**)</span>
+<span class="sd">        </span>
+<span class="sd">        *sens_analysis_storms* (list) -- if empty, it will fill with default list</span>
+<span class="sd">        </span>
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**)</span>
 <span class="sd">   </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        GeoDataFrame with the exposure</span>
+<span class="sd">        *GeoDataFrame* with all **hazard** and **exposure** values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="n">country</span> <span class="o">=</span> <span class="n">region</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     
@@ -246,7 +251,7 @@
         <span class="n">tqdm</span><span class="o">.</span><span class="n">pandas</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;CLC_2012_&#39;</span><span class="o">+</span><span class="n">region</span><span class="p">)</span>
         <span class="n">gdf_table</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_raster_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">out_image</span><span class="p">,</span><span class="n">out_transform</span><span class="p">))</span>
 
-    <span class="c1"># Obtain storm values    </span>
+    <span class="c1"># Obtain storm values for sensitivity analysis storms   </span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">storm_list</span> <span class="o">=</span> <span class="n">load_sens_analysis_storms</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
@@ -257,6 +262,7 @@
                 <span class="n">out_image</span> <span class="o">=</span> <span class="n">out_image</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:]</span>
                 <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_raster_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">out_image</span><span class="p">,</span><span class="n">out_transform</span><span class="p">))</span>
 
+    <span class="c1"># Obtain storm values for historical storms</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">include_storms</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">event_set</span> <span class="o">==</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
@@ -267,6 +273,7 @@
                 <span class="n">out_image</span> <span class="o">=</span> <span class="n">out_image</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:]</span>
                 <span class="n">gdf_table</span><span class="p">[</span><span class="n">storm_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_table</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_raster_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">out_image</span><span class="p">,</span><span class="n">out_transform</span><span class="p">))</span>
 
+    <span class="c1"># Obtain storm values for event set storms</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">include_storms</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">event_set</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
         <span class="n">storm_list</span> <span class="o">=</span> <span class="n">get_event_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">outrast_storm</span> <span class="ow">in</span> <span class="n">storm_list</span><span class="p">:</span>
@@ -287,17 +294,17 @@
 
 
 <div class="viewcode-block" id="region_losses"><a class="viewcode-back" href="../../functions.html#scripts.functions.region_losses">[docs]</a><span class="k">def</span> <span class="nf">region_losses</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">storm_event_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">95</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">80</span><span class="p">)):</span>
-    <span class="sd">&quot;&quot;&quot;&quot;Estimation of the losses for all buildings in a country to the pre-defined list of storms</span>
+    <span class="sd">&quot;&quot;&quot;Estimation of the losses for all buildings in a region for a pre-defined list of storms.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        region {string} -- nuts code of region to consider.</span>
-<span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
-<span class="sd">        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</span>
+<span class="sd">        *region* (string) -- nuts code of region to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *storm_event_set* (bool) -- calculates all regions within a country parallel. Set to **False** if you have little capacity on the machine (default: **True**).</span>
+<span class="sd">        </span>
+<span class="sd">        *sample* (tuple) -- tuple of parameter values. This is a dummy placeholder, should be filled with either **load_sample(country)** values or **sens_analysis_param_list**.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm</span>
+<span class="sd">        *pandas Dataframe* -- pandas dataframe with all buildings of the region and their **losses** for each wind storm.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span> 
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>    
@@ -360,17 +367,19 @@
     
 
 <div class="viewcode-block" id="region_sens_analysis"><a class="viewcode-back" href="../../functions.html#scripts.functions.region_sens_analysis">[docs]</a><span class="k">def</span> <span class="nf">region_sens_analysis</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">samples</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="p">[],</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;&quot;Estimation of the losses for all buildings in a country to the pre-defined list of storms</span>
+    <span class="sd">&quot;&quot;&quot;Perform a sensitivity analysis for the specified region, based on a predefined list of storms. </span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        region {string} -- nuts code of region to consider.</span>
+<span class="sd">        *region* (string) -- nuts code of region to consider.</span>
+
+<span class="sd">        *samples* (list) -- list of tuples, where each tuple is a **unique** set of parameter values.</span>
 <span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        storm_event_set {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
-<span class="sd">        sample {tuple} -- tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</span>
-<span class="sd">    </span>
+<span class="sd">        *sens_analysis_storms* (list) -- if empty, it will fill with default list</span>
+
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**)</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        dataframe -- pandas dataframe with all buildings of the region and their losses for each wind storm</span>
+<span class="sd">        *list* -- list with the total losses per storm for all parameter combinations</span>
 
 <span class="sd">    &quot;&quot;&quot;</span> 
     
@@ -382,14 +391,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sens_analysis_storms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sens_analysis_storms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;19991203&#39;</span><span class="p">,</span><span class="s1">&#39;19900125&#39;</span><span class="p">,</span><span class="s1">&#39;20090124&#39;</span><span class="p">,</span><span class="s1">&#39;20070118&#39;</span><span class="p">,</span><span class="s1">&#39;19991226&#39;</span><span class="p">]</span>
 
-    <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">sens_analysis_storms</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
-                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+    <span class="n">storm_list</span> <span class="o">=</span> <span class="n">sens_analysis_storms</span>
 
-    <span class="n">all_combis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="p">))</span>
+    <span class="n">all_combis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span><span class="n">storm_list</span><span class="p">))</span>
 
     <span class="c1">#load max dam</span>
     <span class="n">max_dam</span> <span class="o">=</span> <span class="n">load_max_dam</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
@@ -398,7 +402,7 @@
     <span class="n">curves</span> <span class="o">=</span> <span class="n">load_curves</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
 
     <span class="c1"># get exposure table   </span>
-    <span class="n">output_table</span> <span class="o">=</span> <span class="n">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="n">sens_analysis_storms</span><span class="p">)</span>
+    <span class="n">output_table</span> <span class="o">=</span> <span class="n">region_exposure</span><span class="p">(</span><span class="n">region</span><span class="p">,</span><span class="n">include_storms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">event_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sens_analysis_storms</span><span class="o">=</span><span class="n">storm_list</span><span class="p">,</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     
     <span class="c1"># calculate losses for all combinations</span>
     <span class="n">output_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">))),</span><span class="n">columns</span><span class="o">=</span><span class="n">sens_analysis_storms</span><span class="p">)</span>
@@ -411,18 +415,23 @@
     <span class="k">return</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="loss_calculation"><a class="viewcode-back" href="../../functions.html#scripts.functions.loss_calculation">[docs]</a><span class="k">def</span> <span class="nf">loss_calculation</span><span class="p">(</span><span class="n">storm</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">output_table</span><span class="p">,</span><span class="n">max_dam</span><span class="p">,</span><span class="n">curves</span><span class="p">,</span><span class="n">sample</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the losses per storm</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the losses per storm.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        storm {string} -- date of the storm</span>
-<span class="sd">        region {string} -- NUTS3 code of region to consider</span>
-<span class="sd">        output_table -- GeoDataFrame with all buildings and the wind speed values for each storm</span>
-<span class="sd">        max_dam {numpy array} -- table with maximum damages per building type/land-use class</span>
-<span class="sd">        curves  {dataframe} -- fragility curves for the different building types</span>
-<span class="sd">        sample {list} -- ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation</span>
+<span class="sd">        *storm* (string) -- date of the storm.</span>
+<span class="sd">        </span>
+<span class="sd">        *region* (string) -- NUTS3 code of region to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *output_table* (GeoDataFrame) -- GeoDataFrame with all buildings and the wind speed values for each storm.</span>
+<span class="sd">        </span>
+<span class="sd">        *max_dam* (numpy array) -- table with maximum damages per building type/land-use class.</span>
+<span class="sd">        </span>
+<span class="sd">        *curves*  (pandas dataframe) -- fragility curves for the different building types.</span>
+<span class="sd">        </span>
+<span class="sd">        *sample* (list) -- ratios of different curves used in this study. See the **Sensitivity analysis documentation** for an explanation.</span>
 <span class="sd">   </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        GeoDataFrame including the losses for the storm</span>
+<span class="sd">        *pandas Series* -- losses to all buildings for the specified storm</span>
 <span class="sd">    &quot;&quot;&quot;</span>   
     
     <span class="n">max_dam_country</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">max_dam</span><span class="p">[</span><span class="n">max_dam</span><span class="p">[</span><span class="s1">&#39;CODE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">country</span><span class="p">)]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:],</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int16&#39;</span><span class="p">)</span>    
@@ -453,11 +462,17 @@
     <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_URB</span><span class="o">+</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_URB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;CLC_2012&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">23</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">RES_NONURB</span><span class="o">+</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;AREA_m2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">df_C4</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">storm</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_curve&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">max_dam_country</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">IND_NONURB</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span><span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">])</span>
 
-<span class="c1">#        # and write output </span>
+    <span class="c1"># and write output </span>
     <span class="k">return</span>  <span class="p">(</span><span class="n">df_C2</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="n">df_C3</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="n">df_C4</span><span class="p">[</span><span class="s1">&#39;Loss&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>        </div>
 
 
 <span class="k">def</span> <span class="nf">get_storm_data</span><span class="p">(</span><span class="n">storm_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  Obtain raster grid of the storm with rasterio</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        *storm_path* (string) -- path to location of storm</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">rio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">storm_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>    
         <span class="c1"># Read as numpy array</span>
         <span class="n">array</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -469,11 +484,11 @@
     <span class="sd">&quot;&quot;&quot;Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        area {[type]} -- [description]</span>
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        *area* (string) -- name of area to clip</span>
+<span class="sd">        </span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
 <span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        NUTS3 {bool} -- [description] (default: {True})</span>
+<span class="sd">        *NUTS3* (bool) -- specify whether it will be a clip of NUTS3 region or the whole country (default: **True**)</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># get data path</span>
@@ -493,12 +508,13 @@
     <span class="sd">&quot;&quot;&quot;Converts the coordinate system from EPSG:4326 to EPSG:3035.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        area {string} -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system </span>
+<span class="sd">        *area* (string) -- name of area (most often NUTS3) for which buildings should be converted to European coordinate system.</span>
 
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        geodataframe -- Geopandas dataframe with all buildings of the selected area</span>
+<span class="sd">        *GeoDataframe* -- Geopandas dataframe with all buildings of the selected area</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># get data path</span>
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
@@ -514,13 +530,13 @@
     <span class="k">return</span> <span class="n">input_</span></div>
     
 <div class="viewcode-block" id="get_storm_list"><a class="viewcode-back" href="../../functions.html#scripts.functions.get_storm_list">[docs]</a><span class="k">def</span> <span class="nf">get_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Small function to create a list of with path strings to all storms</span>
+    <span class="sd">&quot;&quot;&quot;Small function to create a list of with path strings to all storms.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list -- list with the path strings of all storms</span>
+<span class="sd">        *list* -- list with the path strings of all storms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
    
     <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -536,6 +552,14 @@
     <span class="k">return</span> <span class="n">storm_list</span></div>
 
 <div class="viewcode-block" id="get_event_storm_list"><a class="viewcode-back" href="../../functions.html#scripts.functions.get_event_storm_list">[docs]</a><span class="k">def</span> <span class="nf">get_event_storm_list</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Small function to create a list of with path strings to all storms in the event set.</span>
+<span class="sd">    </span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        *list* -- list with the path strings of all storms    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">storm_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;event_set&#39;</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
@@ -552,10 +576,10 @@
     <span class="sd">&quot;&quot;&quot;Small function to load the excel with maximum damages.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dataframe -- pandas dataframe with maximum damages per landuse</span>
+<span class="sd">        *dataframe* -- pandas dataframe with maximum damages per landuse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;max_dam2.xlsx&#39;</span><span class="p">))</span></div>
@@ -565,10 +589,10 @@
     <span class="sd">&quot;&quot;&quot;Small function to load the csv file with the different fragility curves.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dataframe -- pandas dataframe with fragility curves</span>
+<span class="sd">        *dataframe* -- pandas dataframe with fragility curves</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;CURVES.csv&#39;</span><span class="p">),</span><span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C1&#39;</span><span class="p">,</span><span class="s1">&#39;C2&#39;</span><span class="p">,</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span><span class="s1">&#39;C4&#39;</span><span class="p">,</span><span class="s1">&#39;C5&#39;</span><span class="p">,</span><span class="s1">&#39;C6&#39;</span><span class="p">])</span></div>
@@ -578,12 +602,12 @@
     <span class="sd">&quot;&quot;&quot;Will load the ratio of each curve and landuse to be used.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        tuple -- tuple of ratios for the selected country</span>
+<span class="sd">        *tuple* -- tuple with ratios for the selected country. See the **documentation** for an explanation.</span>
 <span class="sd">        </span>
-<span class="sd">        [&#39;c2&#39;, &#39;c3&#39;, &#39;c4&#39;,&#39;lu1&#39;,&#39;lu2&#39;]</span>
+<span class="sd">        **[&#39;c2&#39;, &#39;c3&#39;, &#39;c4&#39;,&#39;lu1&#39;,&#39;lu2&#39;]**</span>
 <span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -605,13 +629,16 @@
     <span class="sd">&quot;&quot;&quot;This function loads the OSM file for the country</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path</span>
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
-<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
-<span class="sd">        regional {boolean} -- set to False by default</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
+<span class="sd">        </span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *region* (string) -- NUTS3 code of region to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *regional* (boolean) -- Boolean to decide whether this should be done on a regional level or for the entire country (default: **False**). </span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        opened OSM file to use in the fetch_roads function</span>
+<span class="sd">        opened OSM file to use in the fetch_roads function.</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -629,13 +656,16 @@
 <span class="sd">    This function directly reads the building data from osm, instead of first converting it to a shapefile</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path</span>
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
-<span class="sd">        region {string} -- NUTS3 code of region to consider.</span>
-<span class="sd">        regional {boolean} -- set to False by default</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
+<span class="sd">        </span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *region* (string) -- NUTS3 code of region to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *regional* (boolean) -- Boolean to decide whether this should be done on a regional level or for the entire country (default: **False**). </span>
 <span class="sd">     </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        geodataframe with all buildings</span>
+<span class="sd">        *Geodataframe* -- Geopandas dataframe with all buildings in the specified **region** or **country**.</span>
 <span class="sd">     </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">load_osm_data</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">regional</span><span class="o">=</span><span class="n">regional</span><span class="p">)</span>
@@ -667,12 +697,12 @@
 <span class="sd">    This function is adapted from the OSMPoly function in QGIS.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path: base path to location of all files.</span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
 <span class="sd">        </span>
-<span class="sd">        country: string name of country ISO2.</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
 <span class="sd">   </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        .poly file for each NUTS3 in a new dir in the working directory.</span>
+<span class="sd">        *.poly file* -- .poly file for each NUTS3 in a new directory in the working directory of the country.</span>
 <span class="sd">    &quot;&quot;&quot;</span>     
    
 <span class="c1"># =============================================================================</span>
@@ -745,12 +775,18 @@
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="clip_landuse"><a class="viewcode-back" href="../../functions.html#scripts.functions.clip_landuse">[docs]</a><span class="k">def</span> <span class="nf">clip_landuse</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">country</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">outrast_lu</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Clip the landuse from the European Corine Land Cover (CLC) map to the considered country</span>
+    <span class="sd">&quot;&quot;&quot;Clip the landuse from the European Corine Land Cover (CLC) map to the considered country.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        data_path {string} -- string of data path where all data is located.</span>
-<span class="sd">        country {string} -- ISO2 code of country to consider.</span>
-<span class="sd">        outrast_lu {string} -- string path to location of Corine Land Cover dataset </span>
+<span class="sd">        *data_path* (string) -- string of data path where all data is located.</span>
+<span class="sd">        </span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *outrast_lu* (string) -- string path to location of Corine Land Cover dataset </span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *raster* (geotiff) -- returns a raster file with only the landuse of the clipped **region** or **country**.</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">inraster</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span><span class="s1">&#39;g100_clc12_V18_5.tif&#39;</span><span class="p">)</span>
@@ -762,6 +798,7 @@
 
 <div class="viewcode-block" id="clip_osm"><a class="viewcode-back" href="../../functions.html#scripts.functions.clip_osm">[docs]</a><span class="k">def</span> <span class="nf">clip_osm</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">osm_path</span><span class="p">,</span><span class="n">area_poly</span><span class="p">,</span><span class="n">area_pbf</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. </span>
+<span class="sd">    </span>
 <span class="sd">    This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</span>
 <span class="sd">    </span>
 <span class="sd">    This function uses the osmconvert tool, which can be found at http://wiki.openstreetmap.org/wiki/Osmconvert. </span>
@@ -769,14 +806,15 @@
 <span class="sd">    Either add the directory where this executable is located to your environmental variables or just put it in the &#39;scripts&#39; directory.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        osm_path: path string to the osm.pbf file of the continent associated with the country.</span>
+<span class="sd">        *osm_path* (string) -- path string to the osm.pbf file of the continent associated with the country.</span>
 <span class="sd">        </span>
-<span class="sd">        area_poly: path string to the .poly file, made through the &#39;create_poly_files&#39; function.</span>
+<span class="sd">        *area_pol* (string) -- path string to the .poly file, made through the &#39;create_poly_files&#39; function.</span>
 <span class="sd">        </span>
-<span class="sd">        area_pbf: path string indicating the final output dir and output name of the new .osm.pbf file.</span>
+<span class="sd">        *area_pbf* (string) -- path string indicating the final output dir and output name of the new .osm.pbf file.</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
 <span class="sd">        a clipped .osm.pbf file.</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span> 
 
     <span class="n">osm_convert_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;osmconvert&#39;</span><span class="p">,</span><span class="s1">&#39;osmconvert64&#39;</span><span class="p">)</span>
@@ -792,7 +830,11 @@
 <span class="sd">    This file load the storms used to perform the sensitivity analysis. </span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar </span>
+<span class="sd">        *storm_name_list* (list) -- list of storms to include in the sensitivity analysis. The default storms are **Anatol**, **Daria**, **Klaus**, **Kyrill** and **Lothar**.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *storm_list* (list) -- same list of storms but now with full paths to location in directory.</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
@@ -801,15 +843,21 @@
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">storm_name_list</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">storm</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
-                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span></div>
+                    <span class="n">storm_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;STORMS&#39;</span><span class="p">,</span><span class="n">file</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">storm_list</span></div>
 
 <div class="viewcode-block" id="get_raster_value"><a class="viewcode-back" href="../../functions.html#scripts.functions.get_raster_value">[docs]</a><span class="k">def</span> <span class="nf">get_raster_value</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">out_image</span><span class="p">,</span><span class="n">out_transform</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Small function to obtain raster value from rastermap, using point_query.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        centroid {geometry} : </span>
-<span class="sd">        out_image {numpy array} : numpy array of grid</span>
-<span class="sd">        out_transform {Affine} : georeference of numpy array</span>
+<span class="sd">        *centroid* (shapely geometry) -- shapely geometry of centroid of the building.</span>
+<span class="sd">        </span>
+<span class="sd">        *out_image* (numpy array) -- numpy array of grid.</span>
+<span class="sd">        </span>
+<span class="sd">        *out_transform* (Affine) -- georeference of numpy array.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *integer* -- raster value corresponding to location of centroid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">point_query</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span><span class="n">out_image</span><span class="p">,</span><span class="n">affine</span><span class="o">=</span><span class="n">out_transform</span><span class="p">,</span><span class="n">nodata</span><span class="o">=-</span><span class="mi">9999</span><span class="p">,</span><span class="n">interpolate</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">255</span><span class="p">)</span>   </div>
 
@@ -817,6 +865,9 @@
 <div class="viewcode-block" id="summary_statistics_losses"><a class="viewcode-back" href="../../functions.html#scripts.functions.summary_statistics_losses">[docs]</a><span class="k">def</span> <span class="nf">summary_statistics_losses</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function creates the file &#39;output_storms.xlsx&#39;. This file is required to create the summary figures.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        *output_storms.xlsx* (excel file) -- Excel file with summary outcomes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>

@@ -173,7 +173,16 @@
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.sensitivity.</code><code class="descname">calculate</code><span class="sig-paren">(</span><em>country</em>, <em>parallel=True</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/sensitivity.html#calculate"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Base function to perform the sensitivity analysis for a country</p>
+<dd><p>Base function to perform the sensitivity analysis for a country.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><p class="first"><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>parallel</em> (bool) – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: <strong>True</strong>).</p>
+<p class="last"><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>).</p>
+</dd>
+<dt>Returns:</dt>
+<dd><em>dataframe</em> – Pandas dataframe with all outcomes per parameter combination.</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -182,7 +191,15 @@
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.sensitivity.</code><code class="descname">prepare_sens_analysis</code><span class="sig-paren">(</span><em>storm_name_list=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/sensitivity.html#prepare_sens_analysis"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Function to prepare the sensitivity analysis for a country</p>
+<dd><p>Function to prepare the sensitivity analysis for a country.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><em>storm_name_list</em> (list) – list of storms to include in sensitivity analysis. If kept empty, default storms will be used.</dd>
+<dt>Returns:</dt>
+<dd><p class="first"><em>param_values</em> (list) – list of 5000 combinations of parameter values to be used in sensitivity analysis.</p>
+<p class="last"><em>storm_name_list</em> (list) – list of storms to include in sensitivity analysis.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -191,7 +208,7 @@
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.sensitivity.</code><code class="descname">read_outcomes_sens_analysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/sensitivity.html#read_outcomes_sens_analysis"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Function to write the output of the sensitivity analysis to figures</p>
+<dd><p>Function to write the output of the sensitivity analysis to figures.</p>
 </dd></dl>
 
 </div>

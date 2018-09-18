@@ -189,15 +189,17 @@
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">region_exposure</code><span class="sig-paren">(</span><em>region</em>, <em>include_storms=True</em>, <em>event_set=False</em>, <em>sens_analysis_storms=[]</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_exposure"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Get exposure data for single region</p>
+<dd><p>Create a GeoDataframe with exposure and hazard information for each building in the specified region.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>region {string} – NUTS3 code of region to consider.
-include_storms {bool} – if set to False, it will only return a list of buildings and their characteristics (default: {True})
-event_set {bool} – if set to True, we will calculate the exposure for the event set instead of the historical storms (default: {True})
-save {bool} – boolean to decide whether you want to save the output to a csv file (default: {True})</dd>
+<dd><p class="first"><em>region</em> (string) – NUTS3 code of region to consider.</p>
+<p><em>include_storms</em> (bool) – if set to False, it will only return a list of buildings and their characteristics (default: <strong>True</strong>)</p>
+<p><em>event_set</em> (bool) – if set to True, we will calculate the exposure for the event set instead of the historical storms (default: <strong>True</strong>)</p>
+<p><em>sens_analysis_storms</em> (list) – if empty, it will fill with default list</p>
+<p class="last"><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>)</p>
+</dd>
 <dt>Returns:</dt>
-<dd>GeoDataFrame with the exposure</dd>
+<dd><em>GeoDataFrame</em> with all <strong>hazard</strong> and <strong>exposure</strong> values.</dd>
 </dl>
 </dd></dl>
 
@@ -207,15 +209,15 @@ save {bool} – boolean to decide whether you want to save the output to a csv f
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">region_losses</code><span class="sig-paren">(</span><em>region</em>, <em>storm_event_set=False</em>, <em>sample=(5</em>, <em>0</em>, <em>95</em>, <em>20</em>, <em>80)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_losses"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>“Estimation of the losses for all buildings in a country to the pre-defined list of storms</p>
+<dd><p>Estimation of the losses for all buildings in a region for a pre-defined list of storms.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>region {string} – nuts code of region to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>storm_event_set {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-sample {tuple} – tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</dd>
+<dd><p class="first"><em>region</em> (string) – nuts code of region to consider.</p>
+<p><em>storm_event_set</em> (bool) – calculates all regions within a country parallel. Set to <strong>False</strong> if you have little capacity on the machine (default: <strong>True</strong>).</p>
+<p class="last"><em>sample</em> (tuple) – tuple of parameter values. This is a dummy placeholder, should be filled with either <strong>load_sample(country)</strong> values or <strong>sens_analysis_param_list</strong>.</p>
+</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with all buildings of the region and their losses for each wind storm</dd>
+<dd><em>pandas Dataframe</em> – pandas dataframe with all buildings of the region and their <strong>losses</strong> for each wind storm.</dd>
 </dl>
 </dd></dl>
 
@@ -225,15 +227,16 @@ sample {tuple} – tuple of parameter values. This is a dummy placeholder, shoul
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">region_sens_analysis</code><span class="sig-paren">(</span><em>region</em>, <em>samples</em>, <em>sens_analysis_storms=[]</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#region_sens_analysis"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>“Estimation of the losses for all buildings in a country to the pre-defined list of storms</p>
+<dd><p>Perform a sensitivity analysis for the specified region, based on a predefined list of storms.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>region {string} – nuts code of region to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>storm_event_set {bool} – calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
-sample {tuple} – tuple of parameter values. This is a dummy placeholder, should be filled with either load_sample(country) values or sens analysis param list</dd>
+<dd><p class="first"><em>region</em> (string) – nuts code of region to consider.</p>
+<p><em>samples</em> (list) – list of tuples, where each tuple is a <strong>unique</strong> set of parameter values.</p>
+<p><em>sens_analysis_storms</em> (list) – if empty, it will fill with default list</p>
+<p class="last"><em>save</em> (bool) – boolean to decide whether you want to save the output to a csv file (default: <strong>True</strong>)</p>
+</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with all buildings of the region and their losses for each wind storm</dd>
+<dd><em>list</em> – list with the total losses per storm for all parameter combinations</dd>
 </dl>
 </dd></dl>
 
@@ -243,17 +246,18 @@ sample {tuple} – tuple of parameter values. This is a dummy placeholder, shoul
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">loss_calculation</code><span class="sig-paren">(</span><em>storm</em>, <em>country</em>, <em>output_table</em>, <em>max_dam</em>, <em>curves</em>, <em>sample</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#loss_calculation"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Calculate the losses per storm</p>
+<dd><p>Calculate the losses per storm.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>storm {string} – date of the storm
-region {string} – NUTS3 code of region to consider
-output_table – GeoDataFrame with all buildings and the wind speed values for each storm
-max_dam {numpy array} – table with maximum damages per building type/land-use class
-curves  {dataframe} – fragility curves for the different building types
-sample {list} – ratios of different curves used in this study. See the Sensitivity analysis documentation for an explanation</dd>
+<dd><p class="first"><em>storm</em> (string) – date of the storm.</p>
+<p><em>region</em> (string) – NUTS3 code of region to consider.</p>
+<p><em>output_table</em> (GeoDataFrame) – GeoDataFrame with all buildings and the wind speed values for each storm.</p>
+<p><em>max_dam</em> (numpy array) – table with maximum damages per building type/land-use class.</p>
+<p><em>curves</em>  (pandas dataframe) – fragility curves for the different building types.</p>
+<p class="last"><em>sample</em> (list) – ratios of different curves used in this study. See the <strong>Sensitivity analysis documentation</strong> for an explanation.</p>
+</dd>
 <dt>Returns:</dt>
-<dd>GeoDataFrame including the losses for the storm</dd>
+<dd><em>pandas Series</em> – losses to all buildings for the specified storm</dd>
 </dl>
 </dd></dl>
 
@@ -266,12 +270,13 @@ sample {list} – ratios of different curves used in this study. See the Sensiti
 <dd><p>This function directly reads the building data from osm, instead of first converting it to a shapefile</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path
-country {string} – ISO2 code of country to consider.
-region {string} – NUTS3 code of region to consider.
-regional {boolean} – set to False by default</dd>
+<dd><p class="first"><em>data_path</em> (string) – string of data path where all data is located.</p>
+<p><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>region</em> (string) – NUTS3 code of region to consider.</p>
+<p class="last"><em>regional</em> (boolean) – Boolean to decide whether this should be done on a regional level or for the entire country (default: <strong>False</strong>).</p>
+</dd>
 <dt>Returns:</dt>
-<dd>geodataframe with all buildings</dd>
+<dd><em>Geodataframe</em> – Geopandas dataframe with all buildings in the specified <strong>region</strong> or <strong>country</strong>.</dd>
 </dl>
 </dd></dl>
 
@@ -286,11 +291,11 @@ regional {boolean} – set to False by default</dd>
 <p>This function is adapted from the OSMPoly function in QGIS.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd><p class="first">data_path: base path to location of all files.</p>
-<p class="last">country: string name of country ISO2.</p>
+<dd><p class="first"><em>data_path</em> (string) – string of data path where all data is located.</p>
+<p class="last"><em>country</em> (string) – ISO2 code of country to consider.</p>
 </dd>
 <dt>Returns:</dt>
-<dd>.poly file for each NUTS3 in a new dir in the working directory.</dd>
+<dd><em>.poly file</em> – .poly file for each NUTS3 in a new directory in the working directory of the country.</dd>
 </dl>
 </dd></dl>
 
@@ -303,10 +308,10 @@ regional {boolean} – set to False by default</dd>
 <dd><p>Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>area {[type]} – [description]
-country {string} – ISO2 code of country to consider.</dd>
-<dt>Keyword Arguments:</dt>
-<dd>NUTS3 {bool} – [description] (default: {True})</dd>
+<dd><p class="first"><em>area</em> (string) – name of area to clip</p>
+<p><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p class="last"><em>NUTS3</em> (bool) – specify whether it will be a clip of NUTS3 region or the whole country (default: <strong>True</strong>)</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -319,11 +324,11 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>Converts the coordinate system from EPSG:4326 to EPSG:3035.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd><p class="first">area {string} – name of area (most often NUTS3) for which buildings should be converted to European coordinate system</p>
-<p class="last">country {string} – ISO2 code of country to consider.</p>
+<dd><p class="first"><em>area</em> (string) – name of area (most often NUTS3) for which buildings should be converted to European coordinate system.</p>
+<p class="last"><em>country</em> (string) – ISO2 code of country to consider.</p>
 </dd>
 <dt>Returns:</dt>
-<dd>geodataframe – Geopandas dataframe with all buildings of the selected area</dd>
+<dd><em>GeoDataframe</em> – Geopandas dataframe with all buildings of the selected area</dd>
 </dl>
 </dd></dl>
 
@@ -333,12 +338,12 @@ country {string} – ISO2 code of country to consider.</dd>
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">get_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#get_storm_list"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Small function to create a list of with path strings to all storms</p>
+<dd><p>Small function to create a list of with path strings to all storms.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.</dd>
+<dd><em>data_path</em> (string) – string of data path where all data is located.</dd>
 <dt>Returns:</dt>
-<dd>list – list with the path strings of all storms</dd>
+<dd><em>list</em> – list with the path strings of all storms</dd>
 </dl>
 </dd></dl>
 
@@ -348,7 +353,14 @@ country {string} – ISO2 code of country to consider.</dd>
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">get_event_storm_list</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#get_event_storm_list"><span class="viewcode-link">[source]</span></a></dt>
-<dd></dd></dl>
+<dd><p>Small function to create a list of with path strings to all storms in the event set.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><em>data_path</em> (string) – string of data path where all data is located.</dd>
+<dt>Returns:</dt>
+<dd><em>list</em> – list with the path strings of all storms</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="load-storms-for-sensitivity-analysis">
@@ -359,7 +371,9 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>This file load the storms used to perform the sensitivity analysis.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>sens_analysis_storms: list of storms to include in the sensitivity analysis. The default storms are Anatol, Daria, Klaus, Kyrill and Lothar</dd>
+<dd><em>storm_name_list</em> (list) – list of storms to include in the sensitivity analysis. The default storms are <strong>Anatol</strong>, <strong>Daria</strong>, <strong>Klaus</strong>, <strong>Kyrill</strong> and <strong>Lothar</strong>.</dd>
+<dt>Returns:</dt>
+<dd><em>storm_list</em> (list) – same list of storms but now with full paths to location in directory.</dd>
 </dl>
 </dd></dl>
 
@@ -372,9 +386,9 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>Small function to load the excel with maximum damages.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.</dd>
+<dd><em>data_path</em> (string) – string of data path where all data is located.</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with maximum damages per landuse</dd>
+<dd><em>dataframe</em> – pandas dataframe with maximum damages per landuse.</dd>
 </dl>
 </dd></dl>
 
@@ -387,9 +401,9 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>Small function to load the csv file with the different fragility curves.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.</dd>
+<dd><em>data_path</em> (string) – string of data path where all data is located.</dd>
 <dt>Returns:</dt>
-<dd>dataframe – pandas dataframe with fragility curves</dd>
+<dd><em>dataframe</em> – pandas dataframe with fragility curves</dd>
 </dl>
 </dd></dl>
 
@@ -402,10 +416,10 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>Will load the ratio of each curve and landuse to be used.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>country {string} – ISO2 code of country to consider.</dd>
+<dd><em>country</em> (string) – ISO2 code of country to consider.</dd>
 <dt>Returns:</dt>
-<dd><p class="first">tuple – tuple of ratios for the selected country</p>
-<p class="last">[‘c2’, ‘c3’, ‘c4’,’lu1’,’lu2’]</p>
+<dd><p class="first"><em>tuple</em> – tuple with ratios for the selected country. See the <strong>documentation</strong> for an explanation.</p>
+<p class="last"><strong>[‘c2’, ‘c3’, ‘c4’,’lu1’,’lu2’]</strong></p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,12 +433,13 @@ country {string} – ISO2 code of country to consider.</dd>
 <dd><p>This function loads the OSM file for the country</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path
-country {string} – ISO2 code of country to consider.
-region {string} – NUTS3 code of region to consider.
-regional {boolean} – set to False by default</dd>
+<dd><p class="first"><em>data_path</em> (string) – string of data path where all data is located.</p>
+<p><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p><em>region</em> (string) – NUTS3 code of region to consider.</p>
+<p class="last"><em>regional</em> (boolean) – Boolean to decide whether this should be done on a regional level or for the entire country (default: <strong>False</strong>).</p>
+</dd>
 <dt>Returns:</dt>
-<dd>opened OSM file to use in the fetch_roads function</dd>
+<dd>opened OSM file to use in the fetch_roads function.</dd>
 </dl>
 </dd></dl>
 
@@ -434,12 +449,15 @@ regional {boolean} – set to False by default</dd>
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">clip_landuse</code><span class="sig-paren">(</span><em>data_path</em>, <em>country</em>, <em>region</em>, <em>outrast_lu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#clip_landuse"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Clip the landuse from the European Corine Land Cover (CLC) map to the considered country</p>
+<dd><p>Clip the landuse from the European Corine Land Cover (CLC) map to the considered country.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>data_path {string} – string of data path where all data is located.
-country {string} – ISO2 code of country to consider.
-outrast_lu {string} – string path to location of Corine Land Cover dataset</dd>
+<dd><p class="first"><em>data_path</em> (string) – string of data path where all data is located.</p>
+<p><em>country</em> (string) – ISO2 code of country to consider.</p>
+<p class="last"><em>outrast_lu</em> (string) – string path to location of Corine Land Cover dataset</p>
+</dd>
+<dt>Returns:</dt>
+<dd><em>raster</em> (geotiff) – returns a raster file with only the landuse of the clipped <strong>region</strong> or <strong>country</strong>.</dd>
 </dl>
 </dd></dl>
 
@@ -449,15 +467,15 @@ outrast_lu {string} – string path to location of Corine Land Cover dataset</dd
 <dl class="function">
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">clip_osm</code><span class="sig-paren">(</span><em>data_path</em>, <em>osm_path</em>, <em>area_poly</em>, <em>area_pbf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#clip_osm"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file. 
-This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</p>
+<dd><p>Clip the an area osm file from the larger continent (or planet) file and save to a new osm.pbf file.</p>
+<p>This is much faster compared to clipping the osm.pbf file while extracting through ogr2ogr.</p>
 <p>This function uses the osmconvert tool, which can be found at <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Osmconvert">http://wiki.openstreetmap.org/wiki/Osmconvert</a>.</p>
 <p>Either add the directory where this executable is located to your environmental variables or just put it in the ‘scripts’ directory.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd><p class="first">osm_path: path string to the osm.pbf file of the continent associated with the country.</p>
-<p>area_poly: path string to the .poly file, made through the ‘create_poly_files’ function.</p>
-<p class="last">area_pbf: path string indicating the final output dir and output name of the new .osm.pbf file.</p>
+<dd><p class="first"><em>osm_path</em> (string) – path string to the osm.pbf file of the continent associated with the country.</p>
+<p><em>area_pol</em> (string) – path string to the .poly file, made through the ‘create_poly_files’ function.</p>
+<p class="last"><em>area_pbf</em> (string) – path string indicating the final output dir and output name of the new .osm.pbf file.</p>
 </dd>
 <dt>Returns:</dt>
 <dd>a clipped .osm.pbf file.</dd>
@@ -473,9 +491,12 @@ This is much faster compared to clipping the osm.pbf file while extracting throu
 <dd><p>Small function to obtain raster value from rastermap, using point_query.</p>
 <dl class="docutils">
 <dt>Arguments:</dt>
-<dd>centroid {geometry} : 
-out_image {numpy array} : numpy array of grid
-out_transform {Affine} : georeference of numpy array</dd>
+<dd><p class="first"><em>centroid</em> (shapely geometry) – shapely geometry of centroid of the building.</p>
+<p><em>out_image</em> (numpy array) – numpy array of grid.</p>
+<p class="last"><em>out_transform</em> (Affine) – georeference of numpy array.</p>
+</dd>
+<dt>Returns:</dt>
+<dd><em>integer</em> – raster value corresponding to location of centroid</dd>
 </dl>
 </dd></dl>
 
@@ -486,6 +507,10 @@ out_transform {Affine} : georeference of numpy array</dd>
 <dt>
 <code class="descclassname">scripts.functions.</code><code class="descname">summary_statistics_losses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/functions.html#summary_statistics_losses"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>This function creates the file ‘output_storms.xlsx’. This file is required to create the summary figures.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd><em>output_storms.xlsx</em> (excel file) – Excel file with summary outcomes</dd>
+</dl>
 </dd></dl>
 
 </div>

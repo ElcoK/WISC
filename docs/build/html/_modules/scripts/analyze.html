@@ -186,7 +186,7 @@
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span><span class="n">cpu_count</span>
 
 <div class="viewcode-block" id="all_countries_risk"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.all_countries_risk">[docs]</a><span class="k">def</span> <span class="nf">all_countries_risk</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Function to estimate the risk for all countries consecutively</span>
+    <span class="sd">&quot;&quot;&quot;Function to estimate the risk for all countries consecutively.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># specify country</span>
     <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;CZ&#39;</span><span class="p">,</span><span class="s1">&#39;CH&#39;</span><span class="p">,</span><span class="s1">&#39;EE&#39;</span><span class="p">,</span><span class="s1">&#39;LV&#39;</span><span class="p">,</span><span class="s1">&#39;LT&#39;</span><span class="p">,</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span><span class="s1">&#39;PL&#39;</span><span class="p">,</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span><span class="s1">&#39;FI&#39;</span><span class="p">,</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span><span class="s1">&#39;DE&#39;</span><span class="p">]</span> 
@@ -196,7 +196,7 @@
 
 
 <div class="viewcode-block" id="all_countries_losses"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.all_countries_losses">[docs]</a><span class="k">def</span> <span class="nf">all_countries_losses</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Function to estimate the losses for all countries consecutively</span>
+    <span class="sd">&quot;&quot;&quot;Function to estimate the losses for all countries consecutively.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># specify country</span>
     <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;CZ&#39;</span><span class="p">,</span><span class="s1">&#39;CH&#39;</span><span class="p">,</span><span class="s1">&#39;EE&#39;</span><span class="p">,</span><span class="s1">&#39;LV&#39;</span><span class="p">,</span><span class="s1">&#39;LT&#39;</span><span class="p">,</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span><span class="s1">&#39;PL&#39;</span><span class="p">,</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span><span class="s1">&#39;FI&#39;</span><span class="p">,</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span><span class="s1">&#39;DE&#39;</span><span class="p">]</span> 
@@ -205,7 +205,7 @@
         <span class="n">losses</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">parallel</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> </div>
         
 <div class="viewcode-block" id="all_countries_exposure"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.all_countries_exposure">[docs]</a><span class="k">def</span> <span class="nf">all_countries_exposure</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Function to estimate the exposure for all countries consecutively</span>
+    <span class="sd">&quot;&quot;&quot;Function to estimate the exposure for all countries consecutively.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1"># specify country</span>
     <span class="n">countries</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LU&#39;</span><span class="p">,</span><span class="s1">&#39;CZ&#39;</span><span class="p">,</span><span class="s1">&#39;CH&#39;</span><span class="p">,</span><span class="s1">&#39;EE&#39;</span><span class="p">,</span><span class="s1">&#39;LV&#39;</span><span class="p">,</span><span class="s1">&#39;LT&#39;</span><span class="p">,</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span><span class="s1">&#39;ES&#39;</span><span class="p">,</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span><span class="s1">&#39;BE&#39;</span><span class="p">,</span><span class="s1">&#39;DK&#39;</span><span class="p">,</span><span class="s1">&#39;IE&#39;</span><span class="p">,</span><span class="s1">&#39;NL&#39;</span><span class="p">,</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span><span class="s1">&#39;SE&#39;</span><span class="p">,</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span><span class="s1">&#39;PL&#39;</span><span class="p">,</span><span class="s1">&#39;IT&#39;</span><span class="p">,</span><span class="s1">&#39;FI&#39;</span><span class="p">,</span><span class="s1">&#39;FR&#39;</span><span class="p">,</span><span class="s1">&#39;DE&#39;</span><span class="p">]</span> 
@@ -215,18 +215,20 @@
 
 <div class="viewcode-block" id="exposure"><a class="viewcode-back" href="../../analyze.html#scripts.analyze.exposure">[docs]</a><span class="k">def</span> <span class="nf">exposure</span><span class="p">(</span><span class="n">country</span><span class="p">,</span> <span class="n">include_storms</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span><span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creation of exposure table of the specified country</span>
+<span class="sd">    Creation of exposure table of the specified country.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        country {string} -- country to consider.</span>
-<span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        include_storms {bool} -- if set to False, it will only return a list of buildings and their characteristics (default: {True})</span>
-<span class="sd">        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
-<span class="sd">        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+
+<span class="sd">        *include_storms* (bool) -- if set to False, it will only return a list of buildings and their characteristics (default: **True**).</span>
+
+<span class="sd">        *parallel* (bool) -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: **True**).</span>
+
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**).</span>
 <span class="sd">    </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        GeoDataframe with all buildings of the country and potential exposure to wind</span>
+<span class="sd">        *GeoDataframe* -- Geopandas dataframe with all buildings of the country and potential exposure to wind</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1">#make sure the country inserted is an ISO2 country name for he remainder of the analysis</span>
@@ -281,15 +283,17 @@
 <span class="sd">    Creation of exposure table of the specified country</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">        country {string} -- country to consider.</span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
 <span class="sd">    </span>
-<span class="sd">    Keyword Arguments:</span>
-<span class="sd">        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})</span>
-<span class="sd">        event_set {bool} -- if set to True, we will calculate the losses for the event set instead of the historical storms (default: {True})</span>
-<span class="sd">        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})</span>
+<span class="sd">        *parallel* (bool) -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: **True**).</span>
+
+<span class="sd">        *event_set* (bool) -- if set to True, we will calculate the losses for the event set instead of the historical storms (default: **True**).</span>
+
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**).</span>
 <span class="sd">        </span>
 <span class="sd">    Returns:</span>
-<span class="sd">        Geodataframe with all buildings of the country and the losses to wind storms</span>
+<span class="sd">        *GeoDataframe* -- Geopandas dataframe with all buildings of the country and their **losses** for each wind storm.</span>
+<span class="sd">        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#make sure the country inserted is an ISO2 country name for he remainder of the analysis</span>
@@ -349,9 +353,14 @@
 <span class="sd">    Estimate risk based on event set</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        country {string} -- country to consider.</span>
-<span class="sd">        path_to_eventset {string} -- the location of the event set in the data directory</span>
-<span class="sd">    </span>
+<span class="sd">        *country* (string) -- ISO2 code of country to consider.</span>
+<span class="sd">        </span>
+<span class="sd">        *path_to_eventset* (string) -- the location of the event set in the data directory</span>
+<span class="sd">        </span>
+<span class="sd">        *save* (bool) -- boolean to decide whether you want to save the output to a csv file (default: **True**).</span>
+<span class="sd">        </span>
+<span class="sd">        *parallel* (bool) -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: **True**).</span>
+<span class="sd">   </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># get data path</span>
     <span class="n">data_path</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
