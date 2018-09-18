@@ -83,7 +83,7 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
         tqdm.pandas(desc='CLC_2012_'+region)
         gdf_table['CLC_2012'] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
-    # Obtain storm values    
+    # Obtain storm values for sensitivity analysis storms   
     if len(sens_analysis_storms) > 0:
         storm_list = load_sens_analysis_storms(sens_analysis_storms)
         for outrast_storm in storm_list:
@@ -94,6 +94,7 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
                 out_image = out_image[0,:,:]
                 gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
+    # Obtain storm values for historical storms
     elif (include_storms == True) & (event_set == False):
         storm_list = get_storm_list(data_path)
         for outrast_storm in storm_list:
@@ -104,6 +105,7 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
                 out_image = out_image[0,:,:]
                 gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
+    # Obtain storm values for event set storms
     elif (include_storms == True) & (event_set == True):
         storm_list = get_event_storm_list(data_path)
         for outrast_storm in storm_list:
@@ -219,14 +221,9 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     if len(sens_analysis_storms) == 0:
         sens_analysis_storms = ['19991203','19900125','20090124','20070118','19991226']
 
-    storm_list = []
-    for root, dirs, files in os.walk(os.path.join(data_path,'STORMS')):
-        for file in files:
-            for storm in sens_analysis_storms:
-                if storm in file:
-                    storm_list.append(os.path.join(data_path,'STORMS',file))
+    storm_list = sens_analysis_storms
 
-    all_combis = list(product(samples,sens_analysis_storms))
+    all_combis = list(product(samples,storm_list))
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -235,7 +232,7 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     curves = load_curves(data_path)
 
     # get exposure table   
-    output_table = region_exposure(region,include_storms=True,sens_analysis_storms=sens_analysis_storms)
+    output_table = region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=storm_list,save=True)
     
     # calculate losses for all combinations
     output_file = pd.DataFrame(index=list(range(len(samples))),columns=sens_analysis_storms)
@@ -290,11 +287,17 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
     df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(0,12, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_URB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_URB)*(sample[2]/100), 0)
     df_C4['Loss'] = np.where(df_C4['CLC_2012'].between(13,23, inclusive=True), (df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,0]*RES_NONURB+df_C4['AREA_m2']*df_C4[str(storm)+'_curve']*max_dam_country[0,2]*IND_NONURB)*(sample[2]/100),df_C4['Loss'])
 
-#        # and write output 
+    # and write output 
     return  (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))        
 
 
 def get_storm_data(storm_path):
+    """  Obtain raster grid of the storm with rasterio
+    
+    Arguments:
+        storm_path {string}
+    
+    """
     with rio.open(storm_path) as src:    
         # Read as numpy array
         array = src.read(1)
@@ -306,11 +309,11 @@ def extract_buildings(area,country,NUTS3=True):
     """Extracts building from OpenStreetMap pbf file and saves it to an ESRI shapefile
     
     Arguments:
-        area {[type]} -- [description]
+        area {string} -- name of area to clip
         country {string} -- ISO2 code of country to consider.
     
     Keyword Arguments:
-        NUTS3 {bool} -- [description] (default: {True})
+        NUTS3 {bool} -- specify whether it will be a clip of NUTS3 region or the whole country (default: {True})
     
     """
     # get data path
@@ -639,14 +642,18 @@ def load_sens_analysis_storms(storm_name_list=['19991203','19900125','20090124',
             for storm in storm_name_list:
                 if storm in file:
                     storm_list.append(os.path.join(data_path,'STORMS',file))
+    return storm_list
 
 def get_raster_value(centroid,out_image,out_transform):
     """Small function to obtain raster value from rastermap, using point_query.
     
     Arguments:
-        centroid {geometry} : 
+        centroid {geometry} : shapely geometry of centroid of the building
         out_image {numpy array} : numpy array of grid
         out_transform {Affine} : georeference of numpy array
+        
+    Returns:
+        raster value corresponding to location of centroid
     """
     return int(point_query(centroid,out_image,affine=out_transform,nodata=-9999,interpolate='nearest')[0] or 255)   
 
@@ -654,6 +661,9 @@ def get_raster_value(centroid,out_image,out_transform):
 def summary_statistics_losses():
     """
     This function creates the file 'output_storms.xlsx'. This file is required to create the summary figures.
+    
+    Returns:
+        output_storms.xlsx {excel file} -- Excel file with summary outcomes
     """
     
     data_path = load_config()['paths']['data']

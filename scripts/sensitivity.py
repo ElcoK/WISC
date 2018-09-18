@@ -33,6 +33,15 @@ cc = coco.CountryConverter()
 
 def calculate(country,parallel=True,save=True):
     """ Base function to perform the sensitivity analysis for a country
+    
+    Arguments:
+        country {string} -- country to consider.
+        parallel {bool} -- calculates all regions within a country parallel. Set to False if you have little capacity on the machine (default: {True})
+        save {bool} -- boolean to decide whether you want to save the output to a csv file (default: {True})
+        
+    Returns:
+        Pandas dataframe with all outcomes per parameter combination
+        
     """
     # set data path    
     data_path = load_config()['paths']['data']
@@ -70,8 +79,15 @@ def calculate(country,parallel=True,save=True):
                 
 def prepare_sens_analysis(storm_name_list=[]):
     """ Function to prepare the sensitivity analysis for a country
+    
+    Arguments:
+        storm_name_list {list} -- list of storms to include in sensitivity analysis. If kept empty, default storms will be used.
+    
+    Returns:
+        param_values {list} -- list of 5000 combinations of parameter values to be used in sensitivity analysis
+        storm_name_list {list} -- list of storms to include in sensitivity analysis
+    
     """    
-    data_path = load_config()['paths']['data']
     
     # set parameters for sensitivity analysis
     problem = {
@@ -91,17 +107,9 @@ def prepare_sens_analysis(storm_name_list=[]):
         inb = (rescale[i]*100)/sum(rescale[i])
         param_values[i,:3] = inb
     
-   
     # select storms to assess
     if len(storm_name_list) == 0:
         storm_name_list = ['19991203','19900125','20090124','20070118','19991226']
-
-    storm_list = []
-    for root, dirs, files in os.walk(os.path.join(data_path,'STORMS')):
-        for file in files:
-            for storm in storm_name_list:
-                if storm in file:
-                    storm_list.append(os.path.join(data_path,'STORMS',file))
                     
     return param_values,storm_name_list
 
