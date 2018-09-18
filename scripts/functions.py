@@ -12,6 +12,8 @@ import pandas as pd
 import geopandas as gpd
 import subprocess
 import rasterio as rio
+from rasterio.mask import mask
+from shapely.geometry import mapping
 from osgeo import ogr
 import shapely.wkt
 from rasterstats import point_query
@@ -21,6 +23,10 @@ sys.path.append(os.path.join( '..'))
 from scripts.utils import load_config,get_num,int2date
 
 from sklearn import metrics
+from tqdm import tqdm
+
+def get_raster_value(centroid,out_image,out_transform):
+    return int(point_query(centroid,out_image,affine=out_transform,nodata=-9999,interpolate='nearest')[0] or 255)   
 
 def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
     """Get exposure data for single region 
@@ -64,34 +70,52 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     # Determine centroid
     gdf_table["centroid"] = gdf_table.geometry.centroid
 
-    # Get land use
     nuts_eu = gpd.read_file(os.path.join(data_path,'input_data','NUTS3_ETRS.shp'))
 
     nuts_eu.loc[nuts_eu['NUTS_ID']==region].to_file(os.path.join(data_path,
                                 country,'NUTS3_SHAPE','{}.shp'.format(region)))
 
-    CLC_2012 = os.path.join(data_path,country,'NUTS3_LANDUSE','{}_LANDUSE.tif'.format(region))
-    clip_landuse(data_path,country,region,CLC_2012)
 
-    gdf_table['CLC_2012'] = point_query(list(gdf_table['centroid']),CLC_2012,nodata=-9999,interpolate='nearest')
+    # create geometry envelope outline for rasterstats. Use a buffer to make sure all buildings are in there.
+    geoms = [mapping(nuts_eu.loc[nuts_eu['NUTS_ID']==region].geometry.envelope.buffer(10000).values[0])]
 
+    # Get land use values 
+    with rio.open(os.path.join(data_path,'input_data','g100_clc12_V18_5.tif')) as src:
+        out_image, out_transform = mask(src, geoms, crop=True)
+        out_image = out_image[0,:,:]
+        tqdm.pandas(desc='CLC_2012_'+region)
+        gdf_table['CLC_2012'] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
+
+    # Obtain storm values    
     if len(sens_analysis_storms) > 0:
         storm_list = load_sens_analysis_storms(sens_analysis_storms)
         for outrast_storm in storm_list:
             storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
-            gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+            tqdm.pandas(desc=storm_name+'_'+region)
+            with rio.open(outrast_storm) as src:
+                out_image, out_transform = mask(src, geoms, crop=True)
+                out_image = out_image[0,:,:]
+                gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
     elif (include_storms == True) & (event_set == False):
         storm_list = get_storm_list(data_path)
         for outrast_storm in storm_list:
             storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
-            gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+            tqdm.pandas(desc=storm_name+'_'+region)
+            with rio.open(outrast_storm) as src:
+                out_image, out_transform = mask(src, geoms, crop=True)
+                out_image = out_image[0,:,:]
+                gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
     elif (include_storms == True) & (event_set == True):
         storm_list = get_event_storm_list(data_path)
         for outrast_storm in storm_list:
             storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
-            gdf_table[storm_name] = point_query(list(gdf_table['centroid']),outrast_storm,nodata=-9999,interpolate='nearest')        
+            tqdm.pandas(desc=storm_name+'_'+region)
+            with rio.open(outrast_storm) as src:
+                out_image, out_transform = mask(src, geoms, crop=True)
+                out_image = out_image[0,:,:]
+                gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
 
     if save == True:
         df_exposure = pd.DataFrame(gdf_table)
