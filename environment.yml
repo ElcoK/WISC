@@ -16,3 +16,4 @@ dependencies:
         - urllib3
         - scikit-learn
         - xlrd
+        - tqdm
