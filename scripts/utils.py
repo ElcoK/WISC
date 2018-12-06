@@ -122,9 +122,9 @@ def country_dict_geofabrik():
     """
    
     countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
-    countries_geofabrik = ['luxembourg','czech-republic','switzerland','estonia','lithuania','latvia','portugal','spain',
-                           'austria','belgium','denmark','ireland-and-northern-ireland','netherlands','sweden',
-                           'united-kingdom','poland','italy','finland','france','germany']
+    countries_geofabrik = ['luxembourg','czech-republic','switzerland','estonia','latvia','lithuania','portugal','spain',
+                           'austria','belgium','denmark','ireland-and-northern-ireland','netherlands','norway','sweden',
+                           'great-britain','poland','italy','finland','france','germany']
 
     return dict(zip(countries,countries_geofabrik))
 

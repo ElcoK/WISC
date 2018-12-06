@@ -50,6 +50,9 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     
     area_poly = os.path.join(data_path,country,'NUTS3_POLY','{}.poly'.format(region))
     area_pbf = os.path.join(data_path,country,'NUTS3_OSM','{}.osm.pbf'.format(region))
+
+    if (region == 'UKN01') | (region == 'UKN02') | (region == 'UKN03') | (region == 'UKN04') | (region == 'UKN05'):
+        osm_path = os.path.join(data_path,'OSM','IE.osm.pbf') 
     
     clip_osm(data_path,osm_path,area_poly,area_pbf)   
     
@@ -448,7 +451,9 @@ def load_sample(country):
         
     """
 
-    dict_  = dict([('AT', ( 5, 0,95,20,80)), 
+    dict_  = dict([('AT', ( 5, 0,95,20,80)),
+                   ('CZ', ( 5, 0,95,20,80)),
+                   ('CH', ( 5, 0,95,20,80)), 
                          ('BE', ( 0,45,55,50,50)), 
                          ('DK', ( 0,20,80,20,80)),
                          ('FR', (10,50,40,20,80)), 
@@ -457,7 +462,15 @@ def load_sample(country):
                          ('LU', (50,50, 0,20,80)),
                          ('NL', ( 0,45,55,20,80)), 
                          ('NO', (0,100, 0,20,80)),
-                         ('SE', ( 0,10,90,50,50)),
+                         ('FI', (5,15, 80,50,50)),
+                         ('LT', (5,15, 80,50,50)),
+                         ('LV', (5,15, 80,50,50)),
+                         ('EE', (5,15, 80,50,50)),
+                         ('PL', (5,15, 80,30,70)),
+                         ('IT', (10,90, 0,20,80)),
+                         ('ES', (15,85, 0,20,80)),
+                         ('PT', (15,85, 0,20,80)),
+                         ('SE', ( 0,10,90,30,70)),
                          ('UK', ( 5,30,65,50,50))])
 
     return dict_[country]

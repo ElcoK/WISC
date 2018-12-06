@@ -69,7 +69,7 @@ def exposure(country, include_storms = True, parallel = True,save=True):
     """
     
     #make sure the country inserted is an ISO2 country name for he remainder of the analysis
-    country = coco.convert(names=country, to='ISO2')
+    #country = coco.convert(names=country, to='ISO2')
 
     # get data path
     data_path = load_config()['paths']['data']
@@ -134,7 +134,7 @@ def losses(country, parallel = True, event_set = False,save=True):
     """
 
     #make sure the country inserted is an ISO2 country name for he remainder of the analysis
-    country = coco.convert(names=country, to='ISO2')
+    #country = coco.convert(names=country, to='ISO2')
 
     # get data path
     data_path = load_config()['paths']['data']
