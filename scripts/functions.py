@@ -519,24 +519,30 @@ def fetch_buildings(data_path,country,region='',regional=False):
      
     """
     data = load_osm_data(data_path,country,region,regional=regional)
-    
-    sql_lyr = data.ExecuteSQL("SELECT osm_id,building,amenity from multipolygons where building is not null")
-    
-    roads=[]
-    for feature in sql_lyr:
-        if feature.GetField('building') is not None:
-            osm_id = feature.GetField('osm_id')
-            shapely_geo = shapely.wkt.loads(feature.geometry().ExportToWkt()) 
-            if shapely_geo is None:
-                continue
-            highway=feature.GetField('building')
-            amenity=feature.GetField('amenity')
-            roads.append([osm_id,highway,amenity,shapely_geo])
-    
+    roads=[]    
+    if data is not None:
+        sql_lyr = data.ExecuteSQL("SELECT osm_id,building,amenity from multipolygons where building is not null")
+        for feature in sql_lyr:
+            try:
+                if feature.GetField('building') is not None:
+                    osm_id = feature.GetField('osm_id')
+                    shapely_geo = shapely.wkt.loads(feature.geometry().ExportToWkt()) 
+                    if shapely_geo is None:
+                        continue
+                    highway=feature.GetField('building')
+                    amenity=feature.GetField('amenity')
+                    roads.append([osm_id,highway,amenity,shapely_geo])
+            except:
+                    print("warning: skipped building")
+    else:
+        print("Nonetype error when requesting SQL for region: {}. Skipping region, check required.".format(region))    
+
     if len(roads) > 0:
         return gpd.GeoDataFrame(roads,columns=['osm_id','building','amenity','geometry'],crs={'init': 'epsg:4326'})
     else:
-        print('No buildings in {}'.format(country))
+        # raise Exception('No buildings in {}'.format(region))
+        print("warning: No buildings or No memory when running region: {}. returning empty geodataframe".format(region)) 
+        return gpd.GeoDataFrame(columns=['osm_id','building','amenity','geometry'],crs={'init': 'epsg:4326'})
     
 def poly_files(data_path,country):
 

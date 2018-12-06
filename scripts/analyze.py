@@ -185,7 +185,7 @@ def losses(country, parallel = True, event_set = False,save=True):
     
     return gpd.GeoDataFrame(pd.concat(country_table),crs='epsg:4326')    
 
-def risk(country,path_to_eventset,save=True,parallel=True):
+def risk(country,save=True,parallel=True):
     """
     Estimate risk based on event set
 
