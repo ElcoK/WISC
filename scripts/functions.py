@@ -730,7 +730,7 @@ def summary_statistics_losses():
     
     countries = ['AT','BE','DK','FR','DE','IE','LU','NL','NO','SE','UK','PL','IT','FI'] 
 
-    first_line = pd.read_csv(os.path.join(data_path,'output_losses','LU','LU00_losses.csv'), nrows=1)
+    first_line = pd.read_csv(os.path.join(data_path,'output_losses','LU','LU000_losses.csv'), nrows=1)
     extract = first_line.columns.tolist()[2:]
     storm_name_list = extract[8:]
     

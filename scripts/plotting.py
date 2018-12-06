@@ -59,8 +59,8 @@ def loss_per_country(figure_output_path='test_country.png'):
     plt.setp(ax_yc.get_xticklabels(), rotation=80)
     ax_yc.set_xlabel("Years", fontweight='bold')
     ax_yc.set_ylabel("Loss in million dollar", fontweight='bold')
-    ax_yc.set_yticks(np.arange(0,26000,2500), minor=False)
-    ax_yc.set_ylim(0,25000)
+    #ax_yc.set_yticks(np.arange(0,66000,2500), minor=False)
+    ax_yc.set_ylim(0,40000)
     ax_yc.legend(loc='upper right', frameon=True, prop={'size':12}) 
     ax_yc.patch.set_facecolor('0.98')
     
