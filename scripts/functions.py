@@ -117,7 +117,7 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
     elif (include_storms == True) & (event_set == True):
         storm_list = get_event_storm_list(data_path)
         for outrast_storm in storm_list:
-            storm_name = str(int2date(get_num(outrast_storm[-23:].split('_')[0][:-2])))
+            storm_name = str(int2date(get_num(outrast_storm[-24:].split('_')[0][:-4])))
             tqdm.pandas(desc=storm_name+'_'+region)
             with rio.open(outrast_storm) as src:
                 out_image, out_transform = mask(src, geoms, crop=True)
@@ -157,7 +157,7 @@ def region_losses(region,storm_event_set=False,sample=(5, 0,95,20,80)):
         storm_name_list = [str(int2date(get_num(x[-23:].split('_')[0][:-2]))) for x in storm_list]
     else:
         storm_list = get_event_storm_list(data_path)
-        storm_name_list = [str(int2date(get_num(x[-23:].split('_')[0][:-2]))) for x in storm_list]
+        storm_name_list = [str(int2date(get_num(x[-24:].split('_')[0][:-4]))) for x in storm_list]
 
     #load max dam
     max_dam = load_max_dam(data_path)
@@ -403,11 +403,11 @@ def get_event_storm_list(data_path):
     storm_list = []
     for root, dirs, files in os.walk(os.path.join(data_path,'event_set')):
         for file in files:
-            if file.endswith('.tif'):
+            if file.endswith('.nc'):
                 fname = os.path.join(data_path,'event_set',file)
                 (filepath, filename_storm) = os.path.split(fname) 
                 (fileshortname_storm, extension) = os.path.splitext(filename_storm) 
-                resample_storm =  os.path.join(data_path,'event_set',fileshortname_storm+'.tif')
+                resample_storm =  os.path.join(data_path,'event_set',fileshortname_storm+'.nc')
                 storm_list.append(resample_storm)    
 
     return storm_list    
