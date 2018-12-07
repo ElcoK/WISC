@@ -25,6 +25,10 @@ from scripts.utils import load_config,get_num,int2date
 from sklearn import metrics
 from tqdm import tqdm
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+pd.set_option('chained_assignment',None)
+
 def region_exposure(region,include_storms=True,event_set=False,sens_analysis_storms=[],save=True):
     """Create a GeoDataframe with exposure and hazard information for each building in the specified region.
     
@@ -62,6 +66,8 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
 
     # convert to european coordinate system for overlap
     gdf_table = gdf_table.to_crs(epsg=3035)
+    
+    print(len(gdf_table))
 
     # Specify Country
     gdf_table["COUNTRY"] = country
@@ -79,7 +85,6 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
 
     nuts_eu.loc[nuts_eu['NUTS_ID']==region].to_file(os.path.join(data_path,
                                 country,'NUTS3_SHAPE','{}.shp'.format(region)))
-
 
     # create geometry envelope outline for rasterstats. Use a buffer to make sure all buildings are in there.
     geoms = [mapping(nuts_eu.loc[nuts_eu['NUTS_ID']==region].geometry.envelope.buffer(10000).values[0])]
@@ -112,17 +117,19 @@ def region_exposure(region,include_storms=True,event_set=False,sens_analysis_sto
                 out_image, out_transform = mask(src, geoms, crop=True)
                 out_image = out_image[0,:,:]
                 gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
+                gdf_table[storm_name].loc[gdf_table[storm_name] < 0] = 0 
+                gdf_table[storm_name].loc[gdf_table[storm_name] > 500] = 0 
 
     # Obtain storm values for event set storms
     elif (include_storms == True) & (event_set == True):
-        storm_list = get_event_storm_list(data_path)
-        for outrast_storm in storm_list:
+        #geoms = [mapping(nuts_eu.loc[nuts_eu['NUTS_ID']==region].to_crs({'init': 'epsg:4326'}).geometry.envelope.buffer(0.1).values[0])]
+        storm_list = get_event_storm_list(data_path)[:10]
+        for outrast_storm in tqdm(storm_list,total=len(storm_list),desc=region):
             storm_name = str(int2date(get_num(outrast_storm[-24:].split('_')[0][:-4])))
-            tqdm.pandas(desc=storm_name+'_'+region)
             with rio.open(outrast_storm) as src:
-                out_image, out_transform = mask(src, geoms, crop=True)
-                out_image = out_image[0,:,:]
-                gdf_table[storm_name] = gdf_table.centroid.progress_apply(lambda x: get_raster_value(x,out_image,out_transform))
+                out_image = src.read(1)
+                out_transform = src.transform
+                gdf_table[storm_name] = gdf_table.centroid.apply(lambda x: get_raster_value(x,out_image,out_transform))
 
     if save == True:
         df_exposure = pd.DataFrame(gdf_table)
@@ -212,7 +219,7 @@ def region_sens_analysis(region,samples,sens_analysis_storms=[],save=True):
     Arguments:
         *region* (string) -- nuts code of region to consider.
 
-        *samples* (list) -- list of tuples, where each tuple is a **unique** set of parameter values.
+        *samples* (list) -- list o tuples, where each tuple is a **unique** set of parameter values.
     
         *sens_analysis_storms* (list) -- if empty, it will fill with default list
 
@@ -279,11 +286,27 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
     df_C2 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
     df_C3 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
     df_C4 = pd.DataFrame(output_table[['AREA_m2','CLC_2012',storm]])
+ 
+    # error processing of large integer value in storm data. 
+    df_C2_error = df_C2[df_C2[storm].astype(str).str.split(".").str[0].map(len) > 10 ]
+    df_C3_error = df_C3[df_C3[storm].astype(str).str.split(".").str[0].map(len) > 10 ]
+    df_C4_error = df_C4[df_C4[storm].astype(str).str.split(".").str[0].map(len) > 10 ]
+    
+    if not df_C2_error.empty:
+        print(df_C2_error)
+    if not df_C3_error.empty:
+        print(df_C3_error)
+    if not df_C4_error.empty:
+        print(df_C4_error)
 
+    df_C2[str(storm)+'_curve'] = df_C2[storm].astype('int64').map(curves['C2']) 
+    df_C3[str(storm)+'_curve'] = df_C3[storm].astype('int64').map(curves['C3'])
+    df_C4[str(storm)+'_curve'] = df_C4[storm].astype('int64').map(curves['C4']) 
 
-    df_C2[str(storm)+'_curve'] = df_C2[storm].map(curves['C2']) 
-    df_C3[str(storm)+'_curve'] = df_C3[storm].map(curves['C3'])
-    df_C4[str(storm)+'_curve'] = df_C4[storm].map(curves['C4']) 
+    # curves are in percentages, rescale to ratio
+    df_C2[str(storm)+'_curve'] = df_C2[str(storm)+'_curve']/100
+    df_C3[str(storm)+'_curve'] = df_C3[str(storm)+'_curve']/100
+    df_C4[str(storm)+'_curve'] = df_C4[str(storm)+'_curve']/100
  
     #specify shares for urban and nonurban        
     RES_URB = sample[4]/100 
@@ -304,7 +327,6 @@ def loss_calculation(storm,country,output_table,max_dam,curves,sample):
 
     # and write output 
     return  (df_C2['Loss'].fillna(0).astype(int) + df_C3['Loss'].fillna(0).astype(int) + df_C4['Loss'].fillna(0).astype(int))        
-
 
 def get_storm_data(storm_path):
     """  Obtain raster grid of the storm with rasterio
@@ -401,13 +423,13 @@ def get_event_storm_list(data_path):
         *list* -- list with the path strings of all storms    
     """
     storm_list = []
-    for root, dirs, files in os.walk(os.path.join(data_path,'event_set')):
+    for root, dirs, files in os.walk(os.path.join(data_path,'event_set_tif')):
         for file in files:
-            if file.endswith('.nc'):
-                fname = os.path.join(data_path,'event_set',file)
+            if file.endswith('.tif'):
+                fname = os.path.join(data_path,'event_set_tif',file)
                 (filepath, filename_storm) = os.path.split(fname) 
                 (fileshortname_storm, extension) = os.path.splitext(filename_storm) 
-                resample_storm =  os.path.join(data_path,'event_set',fileshortname_storm+'.nc')
+                resample_storm =  os.path.join(data_path,'event_set_tif',fileshortname_storm+'.tif')
                 storm_list.append(resample_storm)    
 
     return storm_list    
@@ -455,8 +477,8 @@ def load_sample(country):
                    ('CZ', ( 5, 0,95,20,80)),
                    ('CH', ( 5, 0,95,20,80)), 
                          ('BE', ( 0,45,55,50,50)), 
-                         ('DK', ( 0,20,80,20,80)),
-                         ('FR', (10,50,40,20,80)), 
+                         ('DK', ( 0,10,90,20,80)),
+                         ('FR', (10,30,60,20,80)), 
                          ('DE', ( 5,75,20,50,50)),
                          ('IE', (35,65, 0,30,70)), 
                          ('LU', (50,50, 0,20,80)),
@@ -521,7 +543,7 @@ def fetch_buildings(data_path,country,region='',regional=False):
     data = load_osm_data(data_path,country,region,regional=regional)
     roads=[]    
     if data is not None:
-        sql_lyr = data.ExecuteSQL("SELECT osm_id,building,amenity from multipolygons where building is not null")
+        sql_lyr = data.ExecuteSQL("SELECT osm_id,building from multipolygons where building is not null")
         for feature in sql_lyr:
             try:
                 if feature.GetField('building') is not None:
@@ -530,19 +552,20 @@ def fetch_buildings(data_path,country,region='',regional=False):
                     if shapely_geo is None:
                         continue
                     highway=feature.GetField('building')
-                    amenity=feature.GetField('amenity')
-                    roads.append([osm_id,highway,amenity,shapely_geo])
+                    #amenity=feature.GetField('amenity')
+                    roads.append([osm_id,highway,shapely_geo])
             except:
                     print("warning: skipped building")
+        print(len(roads))
     else:
         print("Nonetype error when requesting SQL for region: {}. Skipping region, check required.".format(region))    
 
     if len(roads) > 0:
-        return gpd.GeoDataFrame(roads,columns=['osm_id','building','amenity','geometry'],crs={'init': 'epsg:4326'})
+        return gpd.GeoDataFrame(roads,columns=['osm_id','building','geometry'],crs={'init': 'epsg:4326'})
     else:
         # raise Exception('No buildings in {}'.format(region))
         print("warning: No buildings or No memory when running region: {}. returning empty geodataframe".format(region)) 
-        return gpd.GeoDataFrame(columns=['osm_id','building','amenity','geometry'],crs={'init': 'epsg:4326'})
+        return gpd.GeoDataFrame(columns=['osm_id','building','geometry'],crs={'init': 'epsg:4326'})
     
 def poly_files(data_path,country):
 
@@ -670,7 +693,6 @@ def clip_osm(data_path,osm_path,area_poly,area_pbf):
         
     Returns:
         a clipped .osm.pbf file.
-        
     """ 
 
     osm_convert_path = os.path.join(data_path,'osmconvert','osmconvert64')

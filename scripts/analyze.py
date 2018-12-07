@@ -20,6 +20,11 @@ cc = coco.CountryConverter()
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
+pd.set_option('chained_assignment',None)
+
+
 from multiprocessing import Pool,cpu_count
 
 def all_countries_risk():
@@ -39,7 +44,7 @@ def all_countries_losses():
     countries = ['LU','CZ','CH','EE','LV','LT','PT','ES','AT','BE','DK','IE','NL','NO','SE','UK','PL','IT','FI','FR','DE'] 
     
     for country in countries:
-        losses(country, parallel = False) 
+        losses(country, parallel = True) 
         
 def all_countries_exposure():
     """Function to estimate the exposure for all countries consecutively.
@@ -207,6 +212,6 @@ def risk(country,save=True,parallel=True):
     if save == True:
         gdf_buildings.drop(['centroid'],axis='columns',inplace=True)
 
-        gdf_buildings.to_file(os.path.join(data_path,'output','risk_{}.shp'.format(country)))
+        gdf_buildings.to_file(os.path.join(data_path,'output_risk','risk_{}.shp'.format(country)))
     
     return gdf_buildings

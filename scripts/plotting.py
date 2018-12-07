@@ -21,7 +21,6 @@ from matplotlib import colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-
 # make connection to all the scripts
 sys.path.append(os.path.join( '..'))
 from scripts.utils import load_config

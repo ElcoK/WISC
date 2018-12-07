@@ -214,4 +214,4 @@ def read_outcomes_sens_analysis():
                 plt.title(country_full_names[country]+', '+storms[out.ix[:,l].name])
                 plt.savefig(os.path.join(data_path,'Figures',country+'_'+storms[out.ix[:,l].name]+'_SA.png'),dpi=300)
                 plt.clf()
-            except Exception as ev: continue
+            except Exception: continue
