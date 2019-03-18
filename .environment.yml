@@ -19,5 +19,4 @@ dependencies:
         - scikit-learn
         - xlrd
         - tqdm
-    - pip:
         - rasterstats
