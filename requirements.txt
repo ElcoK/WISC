@@ -1,0 +1,16 @@
+# requirements
+gdal
+numpy
+pandas
+shapely
+geopandas
+pathos
+rasterio
+matplotlib
+basemap
+SALib
+urllib3
+scikit-learn
+xlrd
+tqdm
+rasterstats
