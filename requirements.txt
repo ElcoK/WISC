@@ -1,11 +1,12 @@
 # requirements
-gdal
 numpy
 pandas
+gdal
 shapely
 geopandas
 pathos
 rasterio
+rasterstats
 matplotlib
 basemap
 SALib
@@ -13,4 +14,4 @@ urllib3
 scikit-learn
 xlrd
 tqdm
-rasterstats
+
