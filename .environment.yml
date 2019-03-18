@@ -1,7 +1,10 @@
 name: WISC
 
+channels:
+    - conda-forge
+
 dependencies:
-        - python=3.5
+        - python=3.6
         - gdal
         - numpy
         - pandas
@@ -9,7 +12,6 @@ dependencies:
         - geopandas
         - pathos
         - rasterio
-        - rasterstats
         - matplotlib
         - basemap
         - SALib
@@ -17,3 +19,5 @@ dependencies:
         - scikit-learn
         - xlrd
         - tqdm
+    - pip:
+        - rasterstats
