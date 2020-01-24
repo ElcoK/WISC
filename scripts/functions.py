@@ -15,7 +15,7 @@ import rasterio as rio
 from rasterio.mask import mask
 from shapely.geometry import mapping
 from osgeo import ogr
-import shapely.wkt
+from shapely.wkb import loads
 from rasterstats import point_query
 from itertools import product
 
@@ -548,7 +548,7 @@ def fetch_buildings(data_path,country,region='',regional=False):
             try:
                 if feature.GetField('building') is not None:
                     osm_id = feature.GetField('osm_id')
-                    shapely_geo = shapely.wkt.loads(feature.geometry().ExportToWkt()) 
+                    shapely_geo = loads(feature.geometry().ExportToWkb())
                     if shapely_geo is None:
                         continue
                     highway=feature.GetField('building')
