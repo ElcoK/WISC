@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # add list of modules used
 
 MOCK_MODULES = ['sklearn','numpy','pandas','geopandas','rasterstats','shapely','mpl_toolkits.basemap','matplotlib.pyplot','SALib.sample','shapely.geometry',
-                'SALib.analyze','multiprocessing','cartopy.crs','cartopy','country_converter','rasterio','osgeo','shapely.wkb','itertools.product',
+                'SALib.analyze','multiprocessing','cartopy.crs','cartopy','country_converter','rasterio','osgeo','shapely.wkb','itertools',
                 'matplotlib.patches','matplotlib.collections','matplotlib.colors','matplotlib.cm','matplotlib','mpl_toolkits.axes_grid1','tqdm','rasterio.mask']
 				
 for mod_name in MOCK_MODULES:
