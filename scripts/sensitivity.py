@@ -12,7 +12,6 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import pandas as pd
-#import matplotlib
 import numpy as np
 from multiprocessing import Pool,cpu_count
 
